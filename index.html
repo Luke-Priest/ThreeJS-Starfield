@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <style>
+            body {
+                margin: 0;
+            }
+            canvas {
+                width: 100%;
+                height: 100%; 
+            }
+        </style>
+    </head>
+    <body>
+        <script type="importmap">
+            {
+              "imports": {
+                "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/"
+              }
+            }
+            </script>
+        <script type="module">
+            import * as THREE from 'three';
+            import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+            
+            let camera, scene, renderer, earth;
+
+            function init() {
+                // Init scene
+                scene = new THREE.Scene();
+
+                // Init camera (PerspectiveCamera)
+                camera = new THREE.PerspectiveCamera(
+                    75,
+                    window.innerWidth / window.innerHeight,
+                    0.1,
+                    1000
+                );
+
+                // Init renderer
+                renderer = new THREE.WebGLRenderer({ antialias: true });
+
+                // Set size (whole window)
+                renderer.setSize(window.innerWidth, window.innerHeight);
+
+                // Render to canvas element
+                document.body.appendChild(renderer.domElement);
+
+                // Init earthGeometry
+                const earthGeometry = new THREE.SphereGeometry( 5, 32, 32 );
+
+                // Create earthMaterial with color
+                const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/stefantaubert/sun-system/master/screenshots/earth.png');
+                const earthMaterial = new THREE.MeshStandardMaterial({ map:texture });
+
+                const controls = new OrbitControls( camera, renderer.domElement );
+
+                //controls.update() must be called after any manual changes to the camera's transform
+                camera.position.set( 0, 20, 0 );
+                controls.update();
+
+                // Create earth mesh with geo and material
+                earth = new THREE.Mesh(earthGeometry, earthMaterial);
+                // Add to scene
+                scene.add(earth);
+
+                // Create background
+                const starGeometry = new THREE.SphereGeometry(1000, 64, 64);
+                const starTexture = new THREE.TextureLoader().load('textures/galaxy_starfield.png');
+                const starMaterial = new THREE.MeshPhongMaterial({
+                map: starTexture,
+                emissiveMap: starTexture,
+                emissive: 0xffffff,
+                emissiveIntensity: 0.2,
+                side: THREE.BackSide,
+                })
+
+                const background = new THREE.Mesh(starGeometry, starMaterial);
+                scene.add(background);
+
+                const light = new THREE.DirectionalLight( 0xffffff, 2);
+                scene.add( light );
+            }
+
+            // Draw the scene every time the screen is refreshed
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+
+            function onWindowResize() {
+                // Camera frustum aspect ratio
+                camera.aspect = window.innerWidth / window.innerHeight;
+                // After making changes to aspect
+                camera.updateProjectionMatrix();
+                // Reset size
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            window.addEventListener('resize', onWindowResize, false);
+
+            init();
+            animate();
+
+
+
+        </script>
+    </body>
+</html>

@@ -26,7 +26,7 @@
             import * as THREE from 'three';
             import { OrbitControls } from "three/addons/controls/OrbitControls.js";
             
-            let camera, scene, renderer, earth;
+            let camera, scene, renderer, earth, earthCloud;
 
             function init() {
                 // Init scene
@@ -37,7 +37,7 @@
                     75,
                     window.innerWidth / window.innerHeight,
                     0.1,
-                    1000
+                    3000
                 );
 
                 // Init renderer
@@ -72,8 +72,8 @@
                     scene.add(earth);
 
                     //Create clouds
-                    const cloudGeometry = new THREE.SphereGeometry(3.05, 64, 64);
-                    const cloudTexture = new THREE.TextureLoader().load('');
+                    const cloudGeometry = new THREE.SphereGeometry(3.025, 64, 64);
+                    const cloudTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/fair_clouds_4k.png');
                     const cloudMaterial = new THREE.MeshPhongMaterial({
                         map: cloudTexture,
                         transparent: true,
@@ -95,7 +95,7 @@
 
                 // Create background
                 const starGeometry = new THREE.SphereGeometry(1000, 64, 64);
-                const starTexture = new THREE.TextureLoader().load('textures/galaxy_starfield.png');
+                const starTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/galaxy_starfield.png');
                 const starMaterial = new THREE.MeshPhongMaterial({
                 map: starTexture,
                 emissiveMap: starTexture,
@@ -111,10 +111,13 @@
                 scene.add( light );
             }
 
+
             // Draw the scene every time the screen is refreshed
             function animate() {
                 requestAnimationFrame(animate);
                 renderer.render(scene, camera);
+                earth.rotation.y += 0.00030;
+                earthCloud.rotation.y += 0.00040;
             }
 
             function onWindowResize() {
@@ -130,7 +133,6 @@
 
             init();
             animate();
-
 
 
         </script>

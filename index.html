@@ -49,12 +49,41 @@
                 // Render to canvas element
                 document.body.appendChild(renderer.domElement);
 
-                // Init earthGeometry
-                const earthGeometry = new THREE.SphereGeometry( 5, 32, 32 );
+                //Create Earth
+                const earthGeometry = new THREE.SphereGeometry(3, 64, 64);
+                const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/RealisticDayEarth.jpg');
+                const bumpMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/earthbump10k.jpg');
+                const specularMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/water_4k.png');
+                const lightMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/EarthLightMap.jpg');
+                const earthMaterial = new THREE.MeshPhongMaterial({ 
+                    map: texture,
+                    bumpMap: bumpMap,
+                    bumpScale: 10,
+                    specularMap: specularMap,
+                    specular: new THREE.Color('grey'),
+                    emissiveMap: lightMap,
+                    emissive: 0xf5e9b9,
+                    emissiveIntensity: 0.2,
+                });
 
-                // Create earthMaterial with color
-                const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/stefantaubert/sun-system/master/screenshots/earth.png');
-                const earthMaterial = new THREE.MeshStandardMaterial({ map:texture });
+                    // Create earth mesh with geo and material
+                    earth = new THREE.Mesh(earthGeometry, earthMaterial);
+                    // Add to scene
+                    scene.add(earth);
+
+                    //Create clouds
+                    const cloudGeometry = new THREE.SphereGeometry(3.05, 64, 64);
+                    const cloudTexture = new THREE.TextureLoader().load('');
+                    const cloudMaterial = new THREE.MeshPhongMaterial({
+                        map: cloudTexture,
+                        transparent: true,
+                    });
+
+                    // Create cloud mesh with geo and material
+                    earthCloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
+                    // Add to scene
+                    scene.add(earthCloud);
+
 
                 const controls = new OrbitControls( camera, renderer.domElement );
 
@@ -62,10 +91,7 @@
                 camera.position.set( 0, 20, 0 );
                 controls.update();
 
-                // Create earth mesh with geo and material
-                earth = new THREE.Mesh(earthGeometry, earthMaterial);
-                // Add to scene
-                scene.add(earth);
+                
 
                 // Create background
                 const starGeometry = new THREE.SphereGeometry(1000, 64, 64);

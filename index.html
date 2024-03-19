@@ -50,26 +50,32 @@
                 // Render to canvas element
                 document.body.appendChild(renderer.domElement);
 
+                const controls = new OrbitControls( camera, renderer.domElement );
+
+                //controls.update() must be called after any manual changes to the camera's transform
+                camera.position.set( 0, 10, 0 );
+                controls.update();
+
                 //Create Earth
 
-                const earthGroup = new THREE.Group();
-                scene.add(earthGroup);
+                    const earthGroup = new THREE.Group();
+                    scene.add(earthGroup);
 
-                const earthGeometry = new THREE.SphereGeometry(3, 64, 64);
-                const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/RealisticDayEarth.jpg');
-                const bumpMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/earthbump10k.jpg');
-                const specularMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/water_4k.png');
-                const lightMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/EarthLightMap.jpg');
-                const earthMaterial = new THREE.MeshPhongMaterial({ 
-                    map: texture,
-                    bumpMap: bumpMap,
-                    bumpScale: 10,
-                    specularMap: specularMap,
-                    specular: new THREE.Color('grey'),
-                    emissiveMap: lightMap,
-                    emissive: 0xf5e9b9,
-                    emissiveIntensity: 0.2,
-                });
+                    const earthGeometry = new THREE.SphereGeometry(3, 64, 64);
+                    const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/RealisticDayEarth.jpg');
+                    const bumpMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/earthbump10k.jpg');
+                    const specularMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/water_4k.png');
+                    const lightMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/EarthLightMap.jpg');
+                    const earthMaterial = new THREE.MeshPhongMaterial({ 
+                        map: texture,
+                        bumpMap: bumpMap,
+                        bumpScale: 10,
+                        specularMap: specularMap,
+                        specular: new THREE.Color('grey'),
+                        emissiveMap: lightMap,
+                        emissive: 0xf5e9b9,
+                        emissiveIntensity: 0.2,
+                    });
 
                     // Create earth mesh with geo and material
                     earth = new THREE.Mesh(earthGeometry, earthMaterial);
@@ -94,13 +100,28 @@
                     glowMesh.scale.setScalar(1.008);
                     earthGroup.add(glowMesh);
 
-                const controls = new OrbitControls( camera, renderer.domElement );
+                // Create Sun
+                    const sunGroup = new THREE.Group();
+                        scene.add(sunGroup);
 
-                //controls.update() must be called after any manual changes to the camera's transform
-                camera.position.set( 0, 10, 0 );
-                controls.update();
+                        const sunGeometry = new THREE.SphereGeometry(3, 64, 64);
+                        const sunMaterial = new THREE.MeshPhongMaterial({ 
+                            map: texture,
+                            bumpMap: bumpMap,
+                            bumpScale: 10,
+                            specularMap: specularMap,
+                            specular: new THREE.Color('grey'),
+                            emissiveMap: lightMap,
+                            emissive: 0xf5e9b9,
+                            emissiveIntensity: 0.2,
+                        });
 
-                
+                        // Create sun mesh with geo and material
+                        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+                        sun.position = 
+                        // Add to group
+                        sunGroup.add(sun);
+
 
                 // Create background
                 const starGeometry = new THREE.SphereGeometry(1000, 64, 64);

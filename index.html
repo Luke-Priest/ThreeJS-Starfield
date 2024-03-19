@@ -18,13 +18,14 @@
             {
               "imports": {
                 "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/", 
+                "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/", "getFresnelMat": "https://pub-48b3469761b74fb6b133ca09b23955ea.r2.dev/getFresnelMat.js"
               }
             }
             </script>
         <script type="module">
             import * as THREE from 'three';
             import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+            import {getFresnelMat} from "getFresnelMat";
             
             let camera, scene, renderer, earth, earthCloud;
 
@@ -81,9 +82,12 @@
 
                     // Create cloud mesh with geo and material
                     earthCloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
-                    // Add to scene
                     scene.add(earthCloud);
 
+                    // Fresnel Shader
+                    const fresnelMat = getFresnelMat();
+                    const glowMesh = new THREE.Mesh(earthGeometry, fresnelMat);
+                    scene.add(glowMesh);
 
                 const controls = new OrbitControls( camera, renderer.domElement );
 

@@ -51,6 +51,10 @@
                 document.body.appendChild(renderer.domElement);
 
                 //Create Earth
+
+                const earthGroup = new THREE.Group();
+                scene.add(earthGroup);
+
                 const earthGeometry = new THREE.SphereGeometry(3, 64, 64);
                 const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/RealisticDayEarth.jpg');
                 const bumpMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/earthbump10k.jpg');
@@ -69,8 +73,8 @@
 
                     // Create earth mesh with geo and material
                     earth = new THREE.Mesh(earthGeometry, earthMaterial);
-                    // Add to scene
-                    scene.add(earth);
+                    // Add to group
+                    earthGroup.add(earth);
 
                     //Create clouds
                     const cloudGeometry = new THREE.SphereGeometry(3.015, 64, 64);
@@ -82,13 +86,13 @@
 
                     // Create cloud mesh with geo and material
                     earthCloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
-                    scene.add(earthCloud);
+                    earthGroup.add(earthCloud);
 
                     // Fresnel Shader
                     const fresnelMat = getFresnelMat();
                     const glowMesh = new THREE.Mesh(earthGeometry, fresnelMat);
                     glowMesh.scale.setScalar(1.008);
-                    scene.add(glowMesh);
+                    earthGroup.add(glowMesh);
 
                 const controls = new OrbitControls( camera, renderer.domElement );
 
@@ -123,7 +127,6 @@
                 renderer.render(scene, camera);
                 earth.rotation.y += 0.00030;
                 earthCloud.rotation.y += 0.00040;
-                glowMesh.rotation.y += 0.00030;
             }
 
             function onWindowResize() {

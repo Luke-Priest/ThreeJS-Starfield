@@ -87,7 +87,7 @@
                     // Fresnel Shader
                     const fresnelMat = getFresnelMat();
                     const glowMesh = new THREE.Mesh(earthGeometry, fresnelMat);
-                    glowMesh.scale.setScalar(1.006);
+                    glowMesh.scale.setScalar(1.008);
                     scene.add(glowMesh);
 
                 const controls = new OrbitControls( camera, renderer.domElement );
@@ -123,6 +123,7 @@
                 renderer.render(scene, camera);
                 earth.rotation.y += 0.00030;
                 earthCloud.rotation.y += 0.00040;
+                glowMesh.rotation.y += 0.00030;
             }
 
             function onWindowResize() {

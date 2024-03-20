@@ -25,6 +25,8 @@
         <script type="module">
             import * as THREE from 'three';
             import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+            import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+			import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
             import {getFresnelMat} from "getFresnelMat";
             
             let camera, scene, renderer, earth, earthCloud;
@@ -55,6 +57,24 @@
                 //controls.update() must be called after any manual changes to the camera's transform
                 camera.position.set( 0, 10, 0 );
                 controls.update();
+
+                // Text
+                const textLoader = new FontLoader();
+
+                textLoader.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
+
+                    const geometry = new TextGeometry( 'Hello three.js!', {
+                        font: font,
+                        size: 80,
+                        height: 5,
+                        curveSegments: 12,
+                        bevelEnabled: true,
+                        bevelThickness: 10,
+                        bevelSize: 8,
+                        bevelOffset: 0,
+                        bevelSegments: 5
+                    } );
+                } );
 
                 //Create Earth
 

@@ -83,7 +83,7 @@
                     earthGroup.add(earth);
 
                     //Create clouds
-                    const cloudGeometry = new THREE.SphereGeometry(3.015, 64, 64);
+                    const cloudGeometry = new THREE.SphereGeometry(3.01, 64, 64);
                     const cloudTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/fair_clouds_4k.png');
                     const cloudMaterial = new THREE.MeshPhongMaterial({
                         map: cloudTexture,
@@ -101,27 +101,7 @@
                     earthGroup.add(glowMesh);
 
                 // Create Sun
-                    const sunGroup = new THREE.Group();
-                        scene.add(sunGroup);
-
-                        const sunGeometry = new THREE.SphereGeometry(3, 64, 64);
-                        const sunMaterial = new THREE.MeshPhongMaterial({ 
-                            map: texture,
-                            bumpMap: bumpMap,
-                            bumpScale: 10,
-                            specularMap: specularMap,
-                            specular: new THREE.Color('grey'),
-                            emissiveMap: lightMap,
-                            emissive: 0xf5e9b9,
-                            emissiveIntensity: 0.2,
-                        });
-
-                        // Create sun mesh with geo and material
-                        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-                        sun.position = 
-                        // Add to group
-                        sunGroup.add(sun);
-
+                    
 
                 // Create background
                 const starGeometry = new THREE.SphereGeometry(1000, 64, 64);

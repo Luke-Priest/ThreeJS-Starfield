@@ -18,15 +18,18 @@
             {
               "imports": {
                 "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/"
+                "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/", "getFresnelMat": "https://pub-48b3469761b74fb6b133ca09b23955ea.r2.dev/getFresnelMat.js"
               }
             }
             </script>
         <script type="module">
             import * as THREE from 'three';
             import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+            import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+			import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+            import {getFresnelMat} from "getFresnelMat";
             
-            let camera, scene, renderer, earth, earthCloud;
+            let camera, scene, renderer, earth, earthCloud, textMesh;
 
             function init() {
                 // Init scene
@@ -42,6 +45,8 @@
 
                 // Init renderer
                 renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
                 // Set size (whole window)
                 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -49,30 +54,69 @@
                 // Render to canvas element
                 document.body.appendChild(renderer.domElement);
 
+                const controls = new OrbitControls( camera, renderer.domElement );
+
+                //controls.update() must be called after any manual changes to the camera's transform
+                camera.position.set( 0, 0, 10 );
+                controls.update();
+
+                // Text
+                const textLoader = new FontLoader();
+
+                textLoader.load( 'https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/Test/fonts/helvetiker_regular.typeface.json', function ( font ) {
+
+                    const textGeometry = new TextGeometry( 'Hello World!', {
+                        font: font,
+                        size: 1,
+                        height: 0.1,
+                        curveSegments: 12,
+                        bevelEnabled: true,
+                        bevelThickness: 0,
+                        bevelSize: 0,
+                        bevelOffset: 0,
+                        bevelSegments: 5
+                    } );
+
+                    const textMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+                    textMesh = new THREE.Mesh( textGeometry, textMaterial ) ;
+                    scene.add( textMesh );
+                    textMesh.position.set(-3.68,3.5,0);
+                    textMesh.castShadow = true; //default is false
+                    textMesh.receiveShadow = true; //default is false  
+
+                } );
+ 
+
                 //Create Earth
-                const earthGeometry = new THREE.SphereGeometry(3, 64, 64);
-                const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/RealisticDayEarth.jpg');
-                const bumpMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/earthbump10k.jpg');
-                const specularMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/water_4k.png');
-                const lightMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/EarthLightMap.jpg');
-                const earthMaterial = new THREE.MeshPhongMaterial({ 
-                    map: texture,
-                    bumpMap: bumpMap,
-                    bumpScale: 10,
-                    specularMap: specularMap,
-                    specular: new THREE.Color('grey'),
-                    emissiveMap: lightMap,
-                    emissive: 0xf5e9b9,
-                    emissiveIntensity: 0.2,
-                });
+
+                    const earthGroup = new THREE.Group();
+                    scene.add(earthGroup);
+
+                    const earthGeometry = new THREE.SphereGeometry(3, 64, 64);
+                    const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/RealisticDayEarth.jpg');
+                    const bumpMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/earthbump10k.jpg');
+                    const specularMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/water_4k.png');
+                    const lightMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/EarthLightMap.jpg');
+                    const earthMaterial = new THREE.MeshPhongMaterial({ 
+                        map: texture,
+                        bumpMap: bumpMap,
+                        bumpScale: 10,
+                        specularMap: specularMap,
+                        specular: new THREE.Color('grey'),
+                        emissiveMap: lightMap,
+                        emissive: 0xf5e9b9,
+                        emissiveIntensity: 0.2,
+                    });
 
                     // Create earth mesh with geo and material
                     earth = new THREE.Mesh(earthGeometry, earthMaterial);
-                    // Add to scene
-                    scene.add(earth);
+                    earth.castShadow = true; //default is false
+                    earth.receiveShadow = true; //default is false
+                    // Add to group
+                    earthGroup.add(earth);
 
                     //Create clouds
-                    const cloudGeometry = new THREE.SphereGeometry(3.025, 64, 64);
+                    const cloudGeometry = new THREE.SphereGeometry(3.01, 64, 64);
                     const cloudTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/fair_clouds_4k.png');
                     const cloudMaterial = new THREE.MeshPhongMaterial({
                         map: cloudTexture,
@@ -81,17 +125,17 @@
 
                     // Create cloud mesh with geo and material
                     earthCloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
-                    // Add to scene
-                    scene.add(earthCloud);
+                    earthCloud.receiveShadow = true; //default is false
+                    earthGroup.add(earthCloud);
 
+                    // Fresnel Shader
+                    const fresnelMat = getFresnelMat();
+                    const glowMesh = new THREE.Mesh(earthGeometry, fresnelMat);
+                    glowMesh.scale.setScalar(1.008);
+                    earthGroup.add(glowMesh);
 
-                const controls = new OrbitControls( camera, renderer.domElement );
-
-                //controls.update() must be called after any manual changes to the camera's transform
-                camera.position.set( 0, 10, 0 );
-                controls.update();
-
-                
+                // Create Sun
+                    
 
                 // Create background
                 const starGeometry = new THREE.SphereGeometry(1000, 64, 64);
@@ -108,7 +152,14 @@
                 scene.add(background);
 
                 const light = new THREE.DirectionalLight( 0xffffff, 2);
+                light.castShadow = true;
                 scene.add( light );
+                light.position.set(0,10,0);
+                //Set up shadow properties for the light
+                light.shadow.mapSize.width = 512; // default
+                light.shadow.mapSize.height = 512; // default
+                light.shadow.camera.near = 0.5; // default
+                light.shadow.camera.far = 500; // default
             }
 
 

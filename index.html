@@ -29,7 +29,7 @@
 			import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
             import {getFresnelMat} from "getFresnelMat";
             
-            let camera, scene, renderer, earth, earthCloud;
+            let camera, scene, renderer, earth, earthCloud, textMesh;
 
             function init() {
                 // Init scene
@@ -45,6 +45,8 @@
 
                 // Init renderer
                 renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
                 // Set size (whole window)
                 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -55,26 +57,35 @@
                 const controls = new OrbitControls( camera, renderer.domElement );
 
                 //controls.update() must be called after any manual changes to the camera's transform
-                camera.position.set( 0, 10, 0 );
+                camera.position.set( 0, 0, 10 );
                 controls.update();
 
                 // Text
                 const textLoader = new FontLoader();
 
-                textLoader.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
+                textLoader.load( 'https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/Test/fonts/helvetiker_regular.typeface.json', function ( font ) {
 
-                    const geometry = new TextGeometry( 'Hello three.js!', {
+                    const textGeometry = new TextGeometry( 'Hello World!', {
                         font: font,
-                        size: 80,
-                        height: 5,
+                        size: 1,
+                        height: 0.1,
                         curveSegments: 12,
                         bevelEnabled: true,
-                        bevelThickness: 10,
-                        bevelSize: 8,
+                        bevelThickness: 0,
+                        bevelSize: 0,
                         bevelOffset: 0,
                         bevelSegments: 5
                     } );
+
+                    const textMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+                    textMesh = new THREE.Mesh( textGeometry, textMaterial ) ;
+                    scene.add( textMesh );
+                    textMesh.position.set(-3.68,3.5,0);
+                    textMesh.castShadow = true; //default is false
+                    textMesh.receiveShadow = true; //default is false  
+
                 } );
+ 
 
                 //Create Earth
 
@@ -99,6 +110,8 @@
 
                     // Create earth mesh with geo and material
                     earth = new THREE.Mesh(earthGeometry, earthMaterial);
+                    earth.castShadow = true; //default is false
+                    earth.receiveShadow = true; //default is false
                     // Add to group
                     earthGroup.add(earth);
 
@@ -112,6 +125,7 @@
 
                     // Create cloud mesh with geo and material
                     earthCloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
+                    earthCloud.receiveShadow = true; //default is false
                     earthGroup.add(earthCloud);
 
                     // Fresnel Shader
@@ -138,7 +152,14 @@
                 scene.add(background);
 
                 const light = new THREE.DirectionalLight( 0xffffff, 2);
+                light.castShadow = true;
                 scene.add( light );
+                light.position.set(0,10,0);
+                //Set up shadow properties for the light
+                light.shadow.mapSize.width = 512; // default
+                light.shadow.mapSize.height = 512; // default
+                light.shadow.camera.near = 0.5; // default
+                light.shadow.camera.far = 500; // default
             }
 
 

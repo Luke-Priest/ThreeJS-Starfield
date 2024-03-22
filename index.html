@@ -27,6 +27,7 @@
             import { OrbitControls } from "three/addons/controls/OrbitControls.js";
             import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 			import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+            import { Lensflare, LensflareElement } from 'three/addons/objects/Lensflare.js';
             import {getFresnelMat} from "getFresnelMat";
             
             let camera, scene, renderer, earth, earthCloud, textMesh;
@@ -135,7 +136,27 @@
                     earthGroup.add(glowMesh);
 
                 // Create Sun
-                    
+                    const light = new THREE.DirectionalLight( 0xffffff, 2);
+                    light.castShadow = true;
+                    scene.add( light );
+                    light.position.set(0,0,100);
+                    //Set up shadow properties for the light
+                    light.shadow.mapSize.width = 2048; // default
+                    light.shadow.mapSize.height = 2048; // default
+                    light.shadow.camera.near = 0.5; // default
+                    light.shadow.camera.far = 500; // default
+
+                    const textureFlare0 = new THREE.TextureLoader().load('textures/lensFlare.png');
+                    //const textureFlare1 = new THREE.TextureLoader().load();
+                    //const textureFlare2 = new THREE.TextureLoader().load();
+
+                    const lensflare = new Lensflare();
+
+                    lensflare.addElement( new LensflareElement( textureFlare0, 20000, 0) );
+                    //lensflare.addElement( new LensflareElement( textureFlare1, 512, 0) );
+                    //lensflare.addElement( new LensflareElement( textureFlare2, 60, 0.6) );
+
+                    light.add( lensflare );
 
                 // Create background
                 const starGeometry = new THREE.SphereGeometry(1000, 64, 64);
@@ -151,15 +172,6 @@
                 const background = new THREE.Mesh(starGeometry, starMaterial);
                 scene.add(background);
 
-                const light = new THREE.DirectionalLight( 0xffffff, 2);
-                light.castShadow = true;
-                scene.add( light );
-                light.position.set(0,10,0);
-                //Set up shadow properties for the light
-                light.shadow.mapSize.width = 512; // default
-                light.shadow.mapSize.height = 512; // default
-                light.shadow.camera.near = 0.5; // default
-                light.shadow.camera.far = 500; // default
             }
 
 

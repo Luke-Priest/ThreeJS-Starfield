@@ -4,7 +4,7 @@ function getFresnelMat({rimHex = 0x00C1FF, facingHex = 0x000000} = {}) {
   const uniforms = {
     color1: { value: new THREE.Color(rimHex) },
     color2: { value: new THREE.Color(facingHex) },
-    fresnelBias: { value: 0.1 },
+    fresnelBias: { value: 0 },
     fresnelScale: { value: 1.0 },
     fresnelPower: { value: 2.5 },
   };

@@ -30,6 +30,7 @@
             import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
             import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
             import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
+            import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
             import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
             import Stats from 'three/addons/libs/stats.module.js';
             import { getFresnelMat } from "getFresnelMat";
@@ -151,6 +152,7 @@
                     light.shadow.camera.far = 500; 
 
                 // Create background
+                // At some point shouldn't be made out of geometry
                 const starGeometry = new THREE.SphereGeometry(1000, 10, 10); // Pretty low poly
                 const starTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/galaxy_starfield.png');
                 const starMaterial = new THREE.MeshPhongMaterial({
@@ -170,7 +172,8 @@
                 //postprocessing
                 composer = new EffectComposer(renderer);
                 composer.addPass(new RenderPass(scene, camera));
-                composer.addPass( new OutputPass() ); // Messes up Fresnel shader
+                composer.addPass( new OutputPass() ); 
+                composer.addPass(new UnrealBloomPass({x: 1024, y: 1024}, 0.2, 0.0, 0.75) );
                 composer.addPass( new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio() ) );  
                 }
 
@@ -179,9 +182,8 @@
             function animate() {
                 requestAnimationFrame(animate);
                 composer.render();
-                composer.setSize(window.innerWidth, window.innerHeight); // Doesn't really affect performance, but theres def a better way
-                earth.rotation.y += 0.00030; // prob shouldn't tie this to animate 
-                earthCloud.rotation.y += 0.00040; // prob shouldn't tie this to animate 
+                earth.rotation.y += 0.00030; // Make this in delta time
+                earthCloud.rotation.y += 0.00040; // Make this in delta time
                 stats.update();
             }
 
@@ -197,9 +199,11 @@
             window.addEventListener('resize', onWindowResize, false);
 
             init();
+            onWindowResize();
             animate();
 
             // 3/24: Shadow res likely causing poor performance on low end
+            // 3/25: At some point need a settings slider to support low end
 
 
         </script>

@@ -37,6 +37,8 @@
             
             let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats;
 
+            let ppi = window.innerWidth / window.innerHeight;
+
             function init() {
                 // Init scene
                 scene = new THREE.Scene();
@@ -194,6 +196,7 @@
                 camera.updateProjectionMatrix();
                 // Reset size
                 renderer.setSize(window.innerWidth, window.innerHeight);
+                composer.setSize(window.innerWidth, window.innerHeight);
             }
 
             window.addEventListener('resize', onWindowResize, false);

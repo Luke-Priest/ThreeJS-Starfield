@@ -85,7 +85,7 @@
                         bevelSegments: 5
                     } );
 
-                    const textMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+                    const textMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} );
                     textMesh = new THREE.Mesh( textGeometry, textMaterial ) ;
                     scene.add( textMesh );
                     textMesh.position.set(-3.68,3.5,0);
@@ -126,7 +126,7 @@
 
                     //Create clouds
                     const cloudGeometry = new THREE.SphereGeometry(3.01, 64, 64); // Should be optimized
-                    const cloudTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/fair_clouds_4k.png'); // Might be worth trying a real CDN ~ 8s download speed on 50mb/s internet
+                    const cloudTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/fair_clouds_4k.png'); // Might wanna change texture for more clouds
                     const cloudMaterial = new THREE.MeshPhongMaterial({
                         map: cloudTexture,
                         transparent: true,

@@ -111,6 +111,7 @@
                         bumpScale: 10,
                         specularMap: specularMap,
                         specular: new THREE.Color('grey'),
+                        shininess: 22.5,
                         emissiveMap: lightMap,
                         emissive: 0xf5e9b9,
                         emissiveIntensity: 0.2,
@@ -175,7 +176,7 @@
                 composer = new EffectComposer(renderer);
                 composer.addPass(new RenderPass(scene, camera));
                 composer.addPass( new OutputPass() ); 
-                composer.addPass(new UnrealBloomPass({x: 1024, y: 1024}, 0.2, 0.0, 0.75) );
+                composer.addPass(new UnrealBloomPass({x: 1024, y: 1024}, 0.35, 0.0, 0.75) );
                 composer.addPass( new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio() ) );  
                 }
 

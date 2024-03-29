@@ -95,6 +95,12 @@
 
                 } );
  
+                //Create Picture cube
+
+                    const pictureGeo = new THREE.BoxGeometry(5.95,5.95,5.95); //define
+                    //const pictureMat = new Three.MeshPhongMaterial({}); 
+                    const pictureCube = new THREE.Mesh(pictureGeo);
+                    scene.add(pictureCube);
 
                 //Create Earth
 
@@ -144,11 +150,22 @@
                     glowMesh.scale.setScalar(1.008);
                     earthGroup.add(glowMesh);
 
+                // Create Moon 
+                    const moonGeo = new THREE.SphereGeometry(2, 16, 16);
+                    //const moonMat = new THREE.MeshPhongMaterial({});
+                    const moon = new THREE.Mesh(moonGeo);
+                    scene.add(moon);
+                    moon.position.set(100, 0, 0);
+
                 // Create Sun
-                    const light = new THREE.DirectionalLight( 0xffffff, 2);
+                    const sunGeo = new THREE.SphereGeometry(100, 32, 32);
+                    const sun = new THREE.Mesh(sunGeo);
+                    scene.add( sun );
+                    sun.position.set(0,0,450);
+                    const light = new THREE.PointLight( 0xffffff, 400000);
                     light.castShadow = true;
                     scene.add( light );
-                    light.position.set(0,0,100);
+                    light.position.set(0,0,450);
                     //Set up shadow properties for the light
                     light.shadow.mapSize.width = 2048; 
                     light.shadow.mapSize.height = 2048;

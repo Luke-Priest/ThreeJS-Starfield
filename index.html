@@ -18,7 +18,7 @@
             {
               "imports": {
                 "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/", "getFresnelMat": "https://pub-48b3469761b74fb6b133ca09b23955ea.r2.dev/getFresnelMat.js"
+                "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/", "getFresnelMat": "https://pub-48b3469761b74fb6b133ca09b23955ea.r2.dev/getFresnelMat.js", "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js"
               }
             }
             </script>
@@ -34,6 +34,7 @@
             import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js'
             import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
             import Stats from 'three/addons/libs/stats.module.js';
+            import 'gsap';
             import { getFresnelMat } from "getFresnelMat";
             
             let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats;
@@ -64,10 +65,10 @@
                 document.body.appendChild(renderer.domElement);
 
                 const controls = new OrbitControls( camera, renderer.domElement );
+                controls.update();
 
                 //controls.update() must be called after any manual changes to the camera's transform
                 camera.position.set( 0, 0, 10 );
-                controls.update();
 
                 // Text
                 const textLoader = new FontLoader();
@@ -98,8 +99,9 @@
                 //Create Picture cube
 
                     const pictureGeo = new THREE.BoxGeometry(5.95,5.95,5.95); //define
-                    //const pictureMat = new Three.MeshPhongMaterial({}); 
-                    const pictureCube = new THREE.Mesh(pictureGeo);
+                    const picture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/RealisticDayEarth.jpg');
+                    const pictureMat = new THREE.MeshPhongMaterial({map: picture}); 
+                    const pictureCube = new THREE.Mesh(pictureGeo, pictureMat);
                     scene.add(pictureCube);
 
                 //Create Earth

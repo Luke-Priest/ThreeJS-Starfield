@@ -18,7 +18,7 @@
             {
               "imports": {
                 "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/", "getFresnelMat": "https://pub-48b3469761b74fb6b133ca09b23955ea.r2.dev/getFresnelMat.js", "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js"
+                "three/addons/": "https://unpkg.com/three@0.161.0/examples/jsm/", "getFresnelMat": "https://pub-48b3469761b74fb6b133ca09b23955ea.r2.dev/getFresnelMat.js"
               }
             }
             </script>
@@ -31,10 +31,9 @@
             import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
             import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
             import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-            import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js'
             import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+            import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
             import Stats from 'three/addons/libs/stats.module.js';
-            import 'gsap';
             import { getFresnelMat } from "getFresnelMat";
             
             let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats;
@@ -98,8 +97,8 @@
  
                 //Create Picture cube
 
-                    const pictureGeo = new THREE.BoxGeometry(5.95,5.95,5.95); //define
-                    const picture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/RealisticDayEarth.jpg');
+                    const pictureGeo = new THREE.BoxGeometry(6,6,6); //define
+                    const picture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/Test/textures/Cat_%3B3.jpg');
                     const pictureMat = new THREE.MeshPhongMaterial({map: picture}); 
                     const pictureCube = new THREE.Mesh(pictureGeo, pictureMat);
                     scene.add(pictureCube);
@@ -154,17 +153,24 @@
 
                 // Create Moon 
                     const moonGeo = new THREE.SphereGeometry(2, 16, 16);
-                    //const moonMat = new THREE.MeshPhongMaterial({});
-                    const moon = new THREE.Mesh(moonGeo);
+                    const moonTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/Test/textures/2k_moon.jpg');
+                    const moonMat = new THREE.MeshPhongMaterial({
+                        emissive: true,
+                        map: moonTexture,
+                    });
+                    const moon = new THREE.Mesh(moonGeo, moonMat);
                     scene.add(moon);
-                    moon.position.set(100, 0, 0);
+                    moon.position.set(0, 100, -100);
+                    moon.castShadow = true;
+                    moon.receiveShadow = true; 
 
                 // Create Sun
                     const sunGeo = new THREE.SphereGeometry(100, 32, 32);
                     const sun = new THREE.Mesh(sunGeo);
                     scene.add( sun );
                     sun.position.set(0,0,450);
-                    const light = new THREE.PointLight( 0xffffff, 400000);
+                    const light = new THREE.PointLight( 0xffffff );
+                    light.power = 35730000; // Fix This !! 
                     light.castShadow = true;
                     scene.add( light );
                     light.position.set(0,0,450);
@@ -182,7 +188,7 @@
                 map: starTexture,
                 emissiveMap: starTexture,
                 emissive: 0xffffff,
-                emissiveIntensity: 0.2,
+                emissiveIntensity: 0.5,
                 side: THREE.BackSide,
                 })
 
@@ -195,9 +201,10 @@
                 //postprocessing
                 composer = new EffectComposer(renderer);
                 composer.addPass(new RenderPass(scene, camera));
-                composer.addPass( new OutputPass() ); 
                 composer.addPass(new UnrealBloomPass({x: 1024, y: 1024}, 0.35, 0.0, 0.75) );
+                composer.addPass(new SSAOPass(scene, camera));
                 composer.addPass( new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio() ) );  
+                composer.addPass( new OutputPass() ); 
                 }
 
 

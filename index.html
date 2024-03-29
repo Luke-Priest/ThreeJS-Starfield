@@ -74,7 +74,7 @@
 
                 textLoader.load( 'https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/Test/fonts/helvetiker_regular.typeface.json', function ( font ) {
 
-                    const textGeometry = new TextGeometry( 'Hello World!', {
+                    const textGeometry = new TextGeometry( 'Scale is ~1:1000 km', {
                         font: font,
                         size: 1,
                         height: 0.1,
@@ -89,7 +89,7 @@
                     const textMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} );
                     textMesh = new THREE.Mesh( textGeometry, textMaterial ) ;
                     scene.add( textMesh );
-                    textMesh.position.set(-3.68,3.5,0);
+                    textMesh.position.set(-6,8,0);
                     textMesh.castShadow = true; //default is false
                     textMesh.receiveShadow = true; //default is false  
 
@@ -108,7 +108,7 @@
                     const earthGroup = new THREE.Group();
                     scene.add(earthGroup);
 
-                    const earthGeometry = new THREE.SphereGeometry(3, 64, 64); // Should be optimized
+                    const earthGeometry = new THREE.SphereGeometry(6.376, 64, 64); // Should be optimized
                     const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/RealisticDayEarth.jpg'); 
                     const bumpMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/earthbump10k.jpg');
                     const specularMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/water_4k.png');
@@ -133,7 +133,7 @@
                     earthGroup.add(earth);
 
                     //Create clouds
-                    const cloudGeometry = new THREE.SphereGeometry(3.01, 64, 64); // Should be optimized
+                    const cloudGeometry = new THREE.SphereGeometry(6.39, 64, 64); // Should be optimized
                     const cloudTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/fair_clouds_4k.png'); // Might wanna change texture for more clouds
                     const cloudMaterial = new THREE.MeshPhongMaterial({
                         map: cloudTexture,
@@ -165,15 +165,15 @@
                     moon.receiveShadow = true; 
 
                 // Create Sun
-                    const sunGeo = new THREE.SphereGeometry(100, 32, 32);
+                    const sunGeo = new THREE.SphereGeometry(100, 32, 32); // Fix This !! 
                     const sun = new THREE.Mesh(sunGeo);
                     scene.add( sun );
-                    sun.position.set(0,0,450);
+                    sun.position.set(0,0,450); // Fix This !!
                     const light = new THREE.PointLight( 0xffffff );
-                    light.power = 35730000; // Fix This !! 
+                    light.power = 3573000; // Fix This !! 
                     light.castShadow = true;
                     scene.add( light );
-                    light.position.set(0,0,450);
+                    light.position.set(0,0,450); // Fix This !! 
                     //Set up shadow properties for the light
                     light.shadow.mapSize.width = 2048; 
                     light.shadow.mapSize.height = 2048;

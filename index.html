@@ -38,7 +38,14 @@
             
             let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats;
 
+            const earthGroup = new THREE.Group();
             let ppi = window.innerWidth / window.innerHeight;
+
+            // Create a new instance of THREE.Clock()
+            var clock = new THREE.Clock();
+
+            // Delta time used for smooth movement
+            var delta = 0;
 
             function init() {
                 // Init scene
@@ -67,7 +74,7 @@
                 controls.update();
 
                 //controls.update() must be called after any manual changes to the camera's transform
-                camera.position.set( 0, 0, 10 );
+                camera.position.set( 0, 0, 696320 );
 
                 // Text
                 const textLoader = new FontLoader();
@@ -94,18 +101,10 @@
                     textMesh.receiveShadow = true; //default is false  
 
                 } );
- 
-                //Create Picture cube
-
-                    const pictureGeo = new THREE.BoxGeometry(6,6,6); //define
-                    const picture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/Test/textures/Cat_%3B3.jpg');
-                    const pictureMat = new THREE.MeshPhongMaterial({map: picture}); 
-                    const pictureCube = new THREE.Mesh(pictureGeo, pictureMat);
-                    scene.add(pictureCube);
 
                 //Create Earth
 
-                    const earthGroup = new THREE.Group();
+                    
                     scene.add(earthGroup);
 
                     const earthGeometry = new THREE.SphereGeometry(6.371, 64, 64); // r= 6371 km
@@ -130,6 +129,7 @@
                     earth.castShadow = true;
                     earth.receiveShadow = true; 
                     // Add to group
+                    earth.position.z = 696300; // 696,300km
                     earthGroup.add(earth);
 
                     //Create clouds
@@ -142,17 +142,19 @@
 
                     // Create cloud mesh with geo and material
                     earthCloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
+                    earthCloud.position.z = 696300; // 696,300km
                     earthCloud.receiveShadow = true; //default is false
                     earthGroup.add(earthCloud);
 
                     // Fresnel Shader
                     const fresnelMat = getFresnelMat();
                     const glowMesh = new THREE.Mesh(earthGeometry, fresnelMat);
+                    glowMesh.position.z = 696300; // 696,300km
                     glowMesh.scale.setScalar(1.008);
                     earthGroup.add(glowMesh);
 
                 // Create Moon 
-                    const moonGeo = new THREE.SphereGeometry(2, 16, 16);
+                    const moonGeo = new THREE.SphereGeometry(1, 16, 16);
                     const moonTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/Test/textures/2k_moon.jpg');
                     const moonMat = new THREE.MeshPhongMaterial({
                         emissive: true,
@@ -160,7 +162,7 @@
                     });
                     const moon = new THREE.Mesh(moonGeo, moonMat);
                     scene.add(moon);
-                    moon.position.set(0, 100, -100);
+                    moon.position.set(0, 0, -40);
                     moon.castShadow = true;
                     moon.receiveShadow = true; 
 
@@ -168,17 +170,19 @@
                     const sunGeo = new THREE.SphereGeometry(149600, 32, 32); // r= 149,600,000 
                     const sun = new THREE.Mesh(sunGeo);
                     scene.add( sun );
-                    sun.position.set(0,0,696300); // 696,300km
                     const light = new THREE.PointLight( 0xffffff );
-                    light.power = 3573000; // Fix This !! 
+                    light.power = 13000000000000; 
+                    light.distance = 69630000;
                     light.castShadow = true;
                     scene.add( light );
-                    light.position.set(0,0,450); // Fix This !! 
                     //Set up shadow properties for the light
                     light.shadow.mapSize.width = 2048; 
                     light.shadow.mapSize.height = 2048;
                     light.shadow.camera.near = 0.5; 
                     light.shadow.camera.far = 500; 
+
+                    const pointLightHelper = new THREE.PointLightHelper( light );
+                    scene.add( pointLightHelper );
 
                 stats = new Stats();
 				document.body.appendChild( stats.dom );
@@ -197,8 +201,10 @@
             function animate() {
                 requestAnimationFrame(animate);
                 composer.render();
-                earth.rotation.y += 0.00030; // Make this in delta time
-                earthCloud.rotation.y += 0.00040; // Make this in delta time
+                delta = clock.getDelta();
+                earthGroup.rotation.y += 0.000001 * delta;
+                console.log(camera.position);
+                earthCloud.rotation.y += 0.05 * delta; 
                 stats.update();
             }
 

@@ -36,7 +36,16 @@
             import Stats from 'three/addons/libs/stats.module.js';
             import { getFresnelMat } from "getFresnelMat";
             
-            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats;
+            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon;
+
+            let controls;
+
+            const Earthradius = 696300;
+            const radius = 696300/2;
+            const center = new THREE.Vector3(0, 0, 0);
+
+            // Step 5: In the animation loop, update the mesh's position using polar coordinates
+            let angle = 0;
 
             const earthGroup = new THREE.Group();
             let ppi = window.innerWidth / window.innerHeight;
@@ -70,44 +79,19 @@
                 // Render to canvas element
                 document.body.appendChild(renderer.domElement);
 
-                const controls = new OrbitControls( camera, renderer.domElement );
-                controls.update();
+                controls = new OrbitControls( camera, renderer.domElement );
+                
 
                 //controls.update() must be called after any manual changes to the camera's transform
-                camera.position.set( 0, 0, 696320 );
-
-                // Text
-                const textLoader = new FontLoader();
-
-                textLoader.load( 'https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/Test/fonts/helvetiker_regular.typeface.json', function ( font ) {
-
-                    const textGeometry = new TextGeometry( 'Scale of 1:1000', {
-                        font: font,
-                        size: 1,
-                        height: 0.1,
-                        curveSegments: 12,
-                        bevelEnabled: true,
-                        bevelThickness: 0,
-                        bevelSize: 0,
-                        bevelOffset: 0,
-                        bevelSegments: 5
-                    } );
-
-                    const textMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff} );
-                    textMesh = new THREE.Mesh( textGeometry, textMaterial ) ;
-                    scene.add( textMesh );
-                    textMesh.position.set(-6,8,0);
-                    textMesh.castShadow = true; //default is false
-                    textMesh.receiveShadow = true; //default is false  
-
-                } );
+                //camera.position.set( 0, 0, 696320 );
+                //camera.lookAt(earth.position);
 
                 //Create Earth
 
                     
                     scene.add(earthGroup);
 
-                    const earthGeometry = new THREE.SphereGeometry(6.371, 64, 64); // r= 6371 km
+                    const earthGeometry = new THREE.SphereGeometry(10000, 64, 64); // r= 6371 km
                     const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/RealisticDayEarth.jpg'); 
                     const bumpMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/earthbump10k.jpg');
                     const specularMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/water_4k.png');
@@ -118,7 +102,7 @@
                         bumpScale: 10,
                         specularMap: specularMap,
                         specular: new THREE.Color('grey'),
-                        shininess: 22.5,
+                        shininess: 30,
                         emissiveMap: lightMap,
                         emissive: 0xf5e9b9,
                         emissiveIntensity: 0.2,
@@ -128,8 +112,6 @@
                     earth = new THREE.Mesh(earthGeometry, earthMaterial);
                     earth.castShadow = true;
                     earth.receiveShadow = true; 
-                    // Add to group
-                    earth.position.z = 696300; // 696,300km
                     earthGroup.add(earth);
 
                     //Create clouds
@@ -142,27 +124,24 @@
 
                     // Create cloud mesh with geo and material
                     earthCloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
-                    earthCloud.position.z = 696300; // 696,300km
                     earthCloud.receiveShadow = true; //default is false
                     earthGroup.add(earthCloud);
 
                     // Fresnel Shader
                     const fresnelMat = getFresnelMat();
                     const glowMesh = new THREE.Mesh(earthGeometry, fresnelMat);
-                    glowMesh.position.z = 696300; // 696,300km
                     glowMesh.scale.setScalar(1.008);
                     earthGroup.add(glowMesh);
 
                 // Create Moon 
-                    const moonGeo = new THREE.SphereGeometry(1, 16, 16);
+                    const moonGeo = new THREE.SphereGeometry(1000, 16, 16);
                     const moonTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/Test/textures/2k_moon.jpg');
                     const moonMat = new THREE.MeshPhongMaterial({
                         emissive: true,
                         map: moonTexture,
                     });
-                    const moon = new THREE.Mesh(moonGeo, moonMat);
+                    moon = new THREE.Mesh(moonGeo, moonMat);
                     scene.add(moon);
-                    moon.position.set(0, 0, -40);
                     moon.castShadow = true;
                     moon.receiveShadow = true; 
 
@@ -176,8 +155,9 @@
                     light.castShadow = true;
                     scene.add( light );
                     //Set up shadow properties for the light
-                    light.shadow.mapSize.width = 2048; 
-                    light.shadow.mapSize.height = 2048;
+                    light.shadow.mapSize.width = 8046; 
+                    light.shadow.mapSize.height = 8046;
+                    light.shadow.radius = 6;
                     light.shadow.camera.near = 0.5; 
                     light.shadow.camera.far = 500; 
 
@@ -194,6 +174,7 @@
                 composer.addPass(new SSAOPass(scene, camera));
                 composer.addPass( new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio() ) );  
                 composer.addPass( new OutputPass() ); 
+
                 }
 
 
@@ -202,9 +183,21 @@
                 requestAnimationFrame(animate);
                 composer.render();
                 delta = clock.getDelta();
-                earthGroup.rotation.y += 0.000001 * delta;
-                console.log(camera.position);
-                earthCloud.rotation.y += 0.05 * delta; 
+                 // Step 4: Define the angle increment
+                const angleIncrement = Math.PI / -10 * delta; //-150
+                // Update the mesh's position using polar coordinates
+                moon.position.x = center.x + radius * Math.cos(angle);
+                moon.position.z = center.z + radius * Math.sin(angle);
+                earthGroup.position.x = center.x + Earthradius * Math.cos(angle);
+                earthGroup.position.z = center.z + Earthradius * Math.sin(angle);
+                let earthpos = earthGroup.position;
+                // Increment the angle
+                camera.position.z = earthGroup.position.z;
+                camera.position.x = earthGroup.position.x + 25000;
+                //camera.lookAt(earthpos);
+                controls.target = earthGroup.position;
+                controls.update();
+                angle += angleIncrement;
                 stats.update();
             }
 

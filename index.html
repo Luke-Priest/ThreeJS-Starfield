@@ -80,6 +80,7 @@
                 document.body.appendChild(renderer.domElement);
 
                 controls = new OrbitControls( camera, renderer.domElement );
+                controls.maxDistance = 32500;
                 
 
                 //controls.update() must be called after any manual changes to the camera's transform
@@ -190,11 +191,6 @@
                 moon.position.z = center.z + radius * Math.sin(angle);
                 earthGroup.position.x = center.x + Earthradius * Math.cos(angle);
                 earthGroup.position.z = center.z + Earthradius * Math.sin(angle);
-                let earthpos = earthGroup.position;
-                // Increment the angle
-                camera.position.z = earthGroup.position.z;
-                camera.position.x = earthGroup.position.x + 25000;
-                //camera.lookAt(earthpos);
                 controls.target = earthGroup.position;
                 controls.update();
                 angle += angleIncrement;

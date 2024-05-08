@@ -68,7 +68,7 @@
                     999999999999
                 );
 
-                camera.position.set(10000,10000,0);
+                camera.position.set(12,0,12);
 
                 // Init renderer
                 renderer = new THREE.WebGLRenderer({});
@@ -93,7 +93,7 @@
                     
                     scene.add(earthGroup);
 
-                    const earthGeometry = new THREE.SphereGeometry(10000, 64, 64); // r= 6371 km
+                    const earthGeometry = new THREE.SphereGeometry(6.371, 64, 64); // r= 6371 km
                     const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/RealisticDayEarth.jpg'); 
                     const bumpMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/earthbump10k.jpg');
                     const specularMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/water_4k.png');
@@ -144,7 +144,7 @@
                     });
                     moon = new THREE.Mesh(moonGeo, moonMat);
                     scene.add(moon);
-                    moon.castShadow = true;
+                    //moon.castShadow = true;
                     moon.receiveShadow = true; 
 
                 // Create Sun
@@ -194,14 +194,14 @@
                 let oldEarthPosZ = earthGroup.position.z;
                 earthGroup.position.x = center.x + Earthradius * Math.cos(angle);
                 earthGroup.position.z = center.z + Earthradius * Math.sin(angle);
+                earth.rotation.y += 0.02 * delta;
+                earthCloud.rotation.y += 0.03 * delta;
                 let newEarthPosX = earthGroup.position.x;
                 let newEarthPosZ = earthGroup.position.z;
                 let earthDifX = oldEarthPosX - newEarthPosX; 
                 let earthDifZ = oldEarthPosZ - newEarthPosZ;
                 camera.position.x = camera.position.x - earthDifX;
                 camera.position.z = camera.position.z - earthDifZ;
-                console.log(camera.position);
-                console.log(earthGroup.position);
                 // Find dif old earth pos and new earth pos, then add that force to the camera 
                 controls.target = earthGroup.position;
                 controls.update();

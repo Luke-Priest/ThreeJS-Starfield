@@ -68,6 +68,8 @@
                     999999999999
                 );
 
+                camera.position.set(10000,10000,0);
+
                 // Init renderer
                 renderer = new THREE.WebGLRenderer({});
                 renderer.shadowMap.enabled = true;
@@ -80,7 +82,6 @@
                 document.body.appendChild(renderer.domElement);
 
                 controls = new OrbitControls( camera, renderer.domElement );
-                controls.maxDistance = 32500;
                 
 
                 //controls.update() must be called after any manual changes to the camera's transform
@@ -189,8 +190,19 @@
                 // Update the mesh's position using polar coordinates
                 moon.position.x = center.x + radius * Math.cos(angle);
                 moon.position.z = center.z + radius * Math.sin(angle);
+                let oldEarthPosX = earthGroup.position.x;
+                let oldEarthPosZ = earthGroup.position.z;
                 earthGroup.position.x = center.x + Earthradius * Math.cos(angle);
                 earthGroup.position.z = center.z + Earthradius * Math.sin(angle);
+                let newEarthPosX = earthGroup.position.x;
+                let newEarthPosZ = earthGroup.position.z;
+                let earthDifX = oldEarthPosX - newEarthPosX; 
+                let earthDifZ = oldEarthPosZ - newEarthPosZ;
+                camera.position.x = camera.position.x - earthDifX;
+                camera.position.z = camera.position.z - earthDifZ;
+                console.log(camera.position);
+                console.log(earthGroup.position);
+                // Find dif old earth pos and new earth pos, then add that force to the camera 
                 controls.target = earthGroup.position;
                 controls.update();
                 angle += angleIncrement;

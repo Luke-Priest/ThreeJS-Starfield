@@ -33,22 +33,23 @@
             import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
             import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
             import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
+            import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
             import Stats from 'three/addons/libs/stats.module.js';
             import { getFresnelMat } from "getFresnelMat";
             
-            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon;
+            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, oldEarthPosX, oldEarthPosZ, newEarthPosX, newEarthPosZ, earthDifX, earthDifZ, gui, conf;
 
             let controls;
 
             const Earthradius = 696300;
-            const radius = 696300/2;
+            const radius = 38.4400*2;
             const center = new THREE.Vector3(0, 0, 0);
 
             // Step 5: In the animation loop, update the mesh's position using polar coordinates
             let angle = 0;
 
             const earthGroup = new THREE.Group();
-            let ppi = window.innerWidth / window.innerHeight;
+
 
             // Create a new instance of THREE.Clock()
             var clock = new THREE.Clock();
@@ -68,6 +69,12 @@
                     999999999999
                 );
 
+                conf = {
+                    earth: true,
+                    moon: false,
+                    sun: false,
+                }
+
                 camera.position.set(12,0,12);
 
                 // Init renderer
@@ -83,10 +90,11 @@
 
                 controls = new OrbitControls( camera, renderer.domElement );
                 
-
-                //controls.update() must be called after any manual changes to the camera's transform
-                //camera.position.set( 0, 0, 696320 );
-                //camera.lookAt(earth.position);
+                gui = new GUI();
+                gui.add( conf, 'earth').name( 'Earth' );
+                gui.add( conf, 'moon').name( 'Moon' );
+                gui.add( conf, 'sun').name( 'Sun' )
+                gui.open();
 
                 //Create Earth
 
@@ -136,7 +144,7 @@
                     earthGroup.add(glowMesh);
 
                 // Create Moon 
-                    const moonGeo = new THREE.SphereGeometry(1000, 16, 16);
+                    const moonGeo = new THREE.SphereGeometry(1.7375, 16, 16); // r= 1,737.5 km
                     const moonTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/Test/textures/2k_moon.jpg');
                     const moonMat = new THREE.MeshPhongMaterial({
                         emissive: true,
@@ -144,7 +152,7 @@
                     });
                     moon = new THREE.Mesh(moonGeo, moonMat);
                     scene.add(moon);
-                    //moon.castShadow = true;
+                    moon.castShadow = true;
                     moon.receiveShadow = true; 
 
                 // Create Sun
@@ -187,25 +195,26 @@
                 delta = clock.getDelta();
                  // Step 4: Define the angle increment
                 const angleIncrement = Math.PI / -10 * delta; //-150
-                // Update the mesh's position using polar coordinates
-                moon.position.x = center.x + radius * Math.cos(angle);
-                moon.position.z = center.z + radius * Math.sin(angle);
-                let oldEarthPosX = earthGroup.position.x;
-                let oldEarthPosZ = earthGroup.position.z;
-                earthGroup.position.x = center.x + Earthradius * Math.cos(angle);
-                earthGroup.position.z = center.z + Earthradius * Math.sin(angle);
-                earth.rotation.y += 0.02 * delta;
-                earthCloud.rotation.y += 0.03 * delta;
-                let newEarthPosX = earthGroup.position.x;
-                let newEarthPosZ = earthGroup.position.z;
-                let earthDifX = oldEarthPosX - newEarthPosX; 
-                let earthDifZ = oldEarthPosZ - newEarthPosZ;
-                camera.position.x = camera.position.x - earthDifX;
-                camera.position.z = camera.position.z - earthDifZ;
-                // Find dif old earth pos and new earth pos, then add that force to the camera 
-                controls.target = earthGroup.position;
-                controls.update();
-                angle += angleIncrement;
+                // Earth Rotations
+                    oldEarthPosX = earthGroup.position.x;
+                    oldEarthPosZ = earthGroup.position.z;
+                    earthGroup.position.x = center.x + Earthradius * Math.cos(angle);
+                    earthGroup.position.z = center.z + Earthradius * Math.sin(angle);
+                    earth.rotation.y += 0.02 * delta;
+                    earthCloud.rotation.y += 0.03 * delta;
+                    newEarthPosX = earthGroup.position.x;
+                    newEarthPosZ = earthGroup.position.z;
+                    earthDifX = oldEarthPosX - newEarthPosX; 
+                    earthDifZ = oldEarthPosZ - newEarthPosZ; 
+                // Moon Rotations
+                    moon.position.x = earthGroup.position.x + radius * Math.cos(angle);
+                    moon.position.z = earthGroup.position.z + radius * Math.sin(angle);
+                // Camera Rotations    
+                    camera.position.x = camera.position.x - earthDifX;
+                    camera.position.z = camera.position.z - earthDifZ;
+                    controls.target = earthGroup.position;
+                    controls.update();
+                    angle += angleIncrement;
                 stats.update();
             }
 

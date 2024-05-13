@@ -37,9 +37,15 @@
             import Stats from 'three/addons/libs/stats.module.js';
             import { getFresnelMat } from "getFresnelMat";
             
-            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, oldEarthPosX, oldEarthPosZ, newEarthPosX, newEarthPosZ, earthDifX, earthDifZ, gui, conf;
+            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet;
 
             let controls;
+
+            conf = {
+                    earth: function() {goToEarth()},
+                    moon: function() {goToMoon()},
+                    sun: function() {goToSun()}
+                }
 
             const Earthradius = 696300;
             const radius = 38.4400*2;
@@ -69,13 +75,7 @@
                     999999999999
                 );
 
-                conf = {
-                    earth: true,
-                    moon: false,
-                    sun: false,
-                }
-
-                camera.position.set(12,0,12);
+                camera.position.set(1,1,1);
 
                 // Init renderer
                 renderer = new THREE.WebGLRenderer({});
@@ -144,7 +144,7 @@
                     earthGroup.add(glowMesh);
 
                 // Create Moon 
-                    const moonGeo = new THREE.SphereGeometry(1.7375, 16, 16); // r= 1,737.5 km
+                    const moonGeo = new THREE.SphereGeometry(1.7375, 32, 32); // r= 1,737.5 km
                     const moonTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/Test/textures/2k_moon.jpg');
                     const moonMat = new THREE.MeshPhongMaterial({
                         emissive: true,
@@ -177,6 +177,10 @@
                 stats = new Stats();
 				document.body.appendChild( stats.dom );
 
+                planet = sun;
+
+                camera.position.set(999999,0,0);
+
                 //postprocessing
                 composer = new EffectComposer(renderer);
                 composer.addPass(new RenderPass(scene, camera));
@@ -187,6 +191,33 @@
 
                 }
 
+            // Find and orbit the Earth
+            function goToEarth() {
+                planet = earthGroup;
+                controls.target = planet.position;
+                camera.position.x = planet.position.x + 15;
+                camera.position.y = planet.position.y;
+                camera.position.z = planet.position.z;
+            }
+
+            // Find and Orbit Earth's moon
+            function goToMoon() {
+                planet = moon;
+                controls.target = planet.position;
+                camera.position.x = planet.position.x + 15;
+                camera.position.y = planet.position.y;
+                camera.position.z = planet.position.z;
+            }
+
+            //Find and orbit the Sun
+            function goToSun() {
+                planet = sun;
+                controls.target.set(0,0,0);
+                camera.position.x = 999999;
+                camera.position.y = 0;
+                camera.position.z = 0;
+            }
+            // Weird bug that spits errors and when switched to from another planet after the user move the camera, camera points away from the Sun
 
             // Draw the scene every time the screen is refreshed
             function animate() {
@@ -196,25 +227,26 @@
                  // Step 4: Define the angle increment
                 const angleIncrement = Math.PI / -10 * delta; //-150
                 // Earth Rotations
-                    oldEarthPosX = earthGroup.position.x;
-                    oldEarthPosZ = earthGroup.position.z;
+                    oldPlanetPosX = planet.position.x;
+                    oldPlanetPosZ = planet.position.z;
                     earthGroup.position.x = center.x + Earthradius * Math.cos(angle);
                     earthGroup.position.z = center.z + Earthradius * Math.sin(angle);
                     earth.rotation.y += 0.02 * delta;
                     earthCloud.rotation.y += 0.03 * delta;
-                    newEarthPosX = earthGroup.position.x;
-                    newEarthPosZ = earthGroup.position.z;
-                    earthDifX = oldEarthPosX - newEarthPosX; 
-                    earthDifZ = oldEarthPosZ - newEarthPosZ; 
                 // Moon Rotations
                     moon.position.x = earthGroup.position.x + radius * Math.cos(angle);
                     moon.position.z = earthGroup.position.z + radius * Math.sin(angle);
-                // Camera Rotations    
-                    camera.position.x = camera.position.x - earthDifX;
-                    camera.position.z = camera.position.z - earthDifZ;
-                    controls.target = earthGroup.position;
+                // Camera Rotations
+                    newPlanetPosX = planet.position.x;
+                    newPlanetPosZ = planet.position.z;
+                    planetDifX = oldPlanetPosX - newPlanetPosX; 
+                    planetDifZ = oldPlanetPosZ - newPlanetPosZ; 
+                    camera.position.x = camera.position.x - planetDifX;
+                    camera.position.z = camera.position.z - planetDifZ;
+                    controls.target = planet.position;
                     controls.update();
                     angle += angleIncrement;
+                console.log(camera.position);
                 stats.update();
             }
 

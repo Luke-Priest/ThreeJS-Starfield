@@ -37,17 +37,19 @@
             import Stats from 'three/addons/libs/stats.module.js';
             import { getFresnelMat } from "getFresnelMat";
             
-            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet;
+            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet;
 
             let controls;
 
             conf = {
                     earth: function() {goToEarth()},
                     moon: function() {goToMoon()},
-                    sun: function() {goToSun()}
+                    sun: function() {goToSun()},
+                    mercury: function() {goToMercury()},
                 }
 
-            const Earthradius = 696300;
+            const Earthradius = 2*(149600+695.7);
+            const marsRadius = 2*(149600+57000);
             const radius = 38.4400*2;
             const center = new THREE.Vector3(0, 0, 0);
 
@@ -93,8 +95,15 @@
                 gui = new GUI();
                 gui.add( conf, 'earth').name( 'Earth' );
                 gui.add( conf, 'moon').name( 'Moon' );
-                gui.add( conf, 'sun').name( 'Sun' )
+                gui.add( conf, 'sun').name( 'Sun' );
+                gui.add( conf, 'mercury').name( 'Mercury' );
                 gui.open();
+
+                //Create Mecury
+                const mercuryGeometry = new THREE.SphereGeometry(100, 64, 64);
+                mercury = new THREE.Mesh(mercuryGeometry);
+                scene.add(mercury);
+                
 
                 //Create Earth
 
@@ -112,7 +121,7 @@
                         bumpScale: 10,
                         specularMap: specularMap,
                         specular: new THREE.Color('grey'),
-                        shininess: 30,
+                        shininess: 25,
                         emissiveMap: lightMap,
                         emissive: 0xf5e9b9,
                         emissiveIntensity: 0.2,
@@ -156,11 +165,11 @@
                     moon.receiveShadow = true; 
 
                 // Create Sun
-                    const sunGeo = new THREE.SphereGeometry(149600, 32, 32); // r= 149,600,000 
+                    const sunGeo = new THREE.SphereGeometry(695.7, 32, 32); // r= 695,700 
                     const sun = new THREE.Mesh(sunGeo);
                     scene.add( sun );
                     const light = new THREE.PointLight( 0xffffff );
-                    light.power = 13000000000000; 
+                    light.power = 4000000000000; 
                     light.distance = 69630000;
                     light.castShadow = true;
                     scene.add( light );
@@ -179,7 +188,7 @@
 
                 planet = sun;
 
-                camera.position.set(999999,0,0);
+                camera.position.set(9999,0,0);
 
                 //postprocessing
                 composer = new EffectComposer(renderer);
@@ -213,10 +222,19 @@
             function goToSun() {
                 planet = sun;
                 controls.target.set(0,0,0);
-                camera.position.x = 999999;
+                camera.position.x = 9999;
                 camera.position.y = 0;
                 camera.position.z = 0;
             }
+            
+            function goToMercury() {
+                planet = mercury;
+                controls.target = planet.position;
+                camera.position.x = planet.position.x + 175;
+                camera.position.y = planet.position.y;
+                camera.position.z = planet.position.z;
+            }
+
             // Weird bug that spits errors and when switched to from another planet after the user move the camera, camera points away from the Sun
 
             // Draw the scene every time the screen is refreshed
@@ -226,9 +244,13 @@
                 delta = clock.getDelta();
                  // Step 4: Define the angle increment
                 const angleIncrement = Math.PI / -10 * delta; //-150
-                // Earth Rotations
+                // Prerotation calcs
                     oldPlanetPosX = planet.position.x;
                     oldPlanetPosZ = planet.position.z;
+                // Venus Rotations
+                    mercury.position.x = center.x + Earthradius * Math.cos(angle);
+                    mercury.position.z = center.z + Earthradius * Math.sin(angle);
+                // Earth Rotations
                     earthGroup.position.x = center.x + Earthradius * Math.cos(angle);
                     earthGroup.position.z = center.z + Earthradius * Math.sin(angle);
                     earth.rotation.y += 0.02 * delta;
@@ -246,7 +268,6 @@
                     controls.target = planet.position;
                     controls.update();
                     angle += angleIncrement;
-                console.log(camera.position);
                 stats.update();
             }
 

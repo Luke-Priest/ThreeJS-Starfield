@@ -37,7 +37,7 @@
             import Stats from 'three/addons/libs/stats.module.js';
             import { getFresnelMat } from "getFresnelMat";
             
-            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, venusAtmosphere, mars, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
+            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, venusAtmosphere, mars, jupiter, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
 
             let controls;
 
@@ -48,13 +48,15 @@
                     earth: function() {goToEarth()},
                     moon: function() {goToMoon()},
                     mars: function() {goToMars()},
+                    jupiter: function() {goToJupiter()},
                 }
 
             const mercuryRotDiameter = 2*(57000+695.7);
             const venusRotDiameter = 2*(108000+695.7);
             const earthRotDiameter = 2*(149600+695.7);
             const moonRotDiameter = 38.4400*2;
-            const marsRotDiameter = 2*(149600+695.7);
+            const marsRotDiameter = 2*(228000+695.7);
+            const jupiterRotDiameter = 2*(228000+695.7);
             const center = new THREE.Vector3(0, 0, 0);
 
             // Step 5: In the animation loop, update the mesh's position using polar coordinates
@@ -104,6 +106,7 @@
                 gui.add( conf, 'earth').name( 'Earth' );
                 gui.add( conf, 'moon').name( 'Moon' );
                 gui.add( conf, 'mars').name( 'Mars' );
+                gui.add( conf, 'jupiter').name( 'Jupiter' );
                 gui.open();
 
                 // Create Sun
@@ -214,13 +217,22 @@
                     moon.receiveShadow = true; 
 
                 // Create Mars
-                    const marsGeo = new THREE.SphereGeometry(100, 64, 64);
-                    //const marsTexture = new THREE.TextureLoader().load('');
-                    //const marsMat = new THREE.MeshPhongMaterial({
-                    //    map: marsTexture,
-                    //});
-                    mars = new THREE.Mesh(marsGeo);
+                    const marsGeo = new THREE.SphereGeometry(3.3962, 64, 64); // r= 3396.2 km
+                    const marsTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_mars.jpg');
+                    const marsMat = new THREE.MeshPhongMaterial({
+                        map: marsTexture,
+                    });
+                    mars = new THREE.Mesh(marsGeo, marsMat);
                     scene.add(mars);
+
+                // Create Jupiter
+                    const jupiterGeo = new THREE.SphereGeometry(100,64,64);
+                    //const jupiterTexture = new THREE.TextureLoader().load('');
+                    //const jupiterMat = new THREE.MeshPhongMaterial({
+                    //    map: juptierTexture,
+                    //})
+                    jupiter = new THREE.Mesh(jupiterGeo);
+                    scene.add(jupiter);
 
                 stats = new Stats();
 				document.body.appendChild( stats.dom );
@@ -291,7 +303,16 @@
             // Find and Orbit Mars
             function goToMars() {
                 planet = mars;
-                light.power = 4000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
+                light.power = 7000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
+                controls.target = planet.position;
+                camera.position.x = planet.position.x + 15;
+                camera.position.y = planet.position.y;
+                camera.position.z = planet.position.z;
+            }
+
+            function goToJupiter() {
+                planet = jupiter;
+                light.power = 7000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
                 controls.target = planet.position;
                 camera.position.x = planet.position.x + 15;
                 camera.position.y = planet.position.y;
@@ -328,6 +349,9 @@
                 // Mars Rotations
                     mars.position.x = center.x + marsRotDiameter * Math.cos(angle);
                     mars.position.z = center.z + marsRotDiameter * Math.sin(angle);
+                // Jupiter Rotations
+                    jupiter.position.x = center.x + jupiterRotDiameter * Math.cos(angle);
+                    jupiter.position.z = center.z + jupiterRotDiameter * Math.sin(angle);
                 // Camera Rotations
                     newPlanetPosX = planet.position.x;
                     newPlanetPosZ = planet.position.z;

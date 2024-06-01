@@ -37,20 +37,22 @@
             import Stats from 'three/addons/libs/stats.module.js';
             import { getFresnelMat } from "getFresnelMat";
             
-            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet;
+            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
 
             let controls;
 
             conf = {
-                    earth: function() {goToEarth()},
-                    moon: function() {goToMoon()},
                     sun: function() {goToSun()},
                     mercury: function() {goToMercury()},
+                    venus: function() {goToVenus()},
+                    earth: function() {goToEarth()},
+                    moon: function() {goToMoon()},
                 }
 
-            const Earthradius = 2*(149600+695.7);
-            const marsRadius = 2*(149600+57000);
-            const radius = 38.4400*2;
+            const mercuryRotDiameter = 2*(57000+695.7);
+            const venusRotDiameter = 2*(108000+695.7);
+            const earthRotDiameter = 2*(149600+695.7);
+            const moonRotDiameter = 38.4400*2;
             const center = new THREE.Vector3(0, 0, 0);
 
             // Step 5: In the animation loop, update the mesh's position using polar coordinates
@@ -93,17 +95,49 @@
                 controls = new OrbitControls( camera, renderer.domElement );
                 
                 gui = new GUI();
-                gui.add( conf, 'earth').name( 'Earth' );
-                gui.add( conf, 'moon').name( 'Moon' );
                 gui.add( conf, 'sun').name( 'Sun' );
                 gui.add( conf, 'mercury').name( 'Mercury' );
+                gui.add( conf, 'venus').name( 'Venus' );
+                gui.add( conf, 'earth').name( 'Earth' );
+                gui.add( conf, 'moon').name( 'Moon' );
                 gui.open();
 
                 //Create Mecury
-                const mercuryGeometry = new THREE.SphereGeometry(100, 64, 64);
-                mercury = new THREE.Mesh(mercuryGeometry);
+                const mercuryGeometry = new THREE.SphereGeometry(2.4405, 64, 64); // r= 2,440.5 km
+                const mercuryTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_mercury.jpg');
+                const mercuryMaterial = new THREE.MeshPhongMaterial({
+                    map: mercuryTexture,
+                })
+                mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
                 scene.add(mercury);
-                
+
+                //Create Venus
+                const venusGeometry = new THREE.SphereGeometry(6.0518, 64, 64); // r= 6,051.8 km 
+                //const venusTexture = new THREE.TextureLoader().load('');
+                //const venusMaterial = new THREE.MeshPhongMaterial({
+                //    map: venusTexture,
+                //});
+                venus = new THREE.Mesh(venusGeometry);
+                scene.add(venus);
+
+                // Create Sun
+                const sunGeo = new THREE.SphereGeometry(695.7, 32, 32); // r= 695,700 
+                    const sun = new THREE.Mesh(sunGeo);
+                    scene.add( sun );
+                    light = new THREE.PointLight( 0xffffff );
+                    light.power = 4000000000000; 
+                    light.distance = 69630000;
+                    light.castShadow = true;
+                    scene.add( light );
+                    //Set up shadow properties for the light
+                    light.shadow.mapSize.width = 8046; 
+                    light.shadow.mapSize.height = 8046;
+                    light.shadow.radius = 6;
+                    light.shadow.camera.near = 0.5; 
+                    light.shadow.camera.far = 500; 
+
+                    const pointLightHelper = new THREE.PointLightHelper( light );
+                    scene.add( pointLightHelper );
 
                 //Create Earth
 
@@ -121,7 +155,7 @@
                         bumpScale: 10,
                         specularMap: specularMap,
                         specular: new THREE.Color('grey'),
-                        shininess: 25,
+                        shininess: 20,
                         emissiveMap: lightMap,
                         emissive: 0xf5e9b9,
                         emissiveIntensity: 0.2,
@@ -164,25 +198,6 @@
                     moon.castShadow = true;
                     moon.receiveShadow = true; 
 
-                // Create Sun
-                    const sunGeo = new THREE.SphereGeometry(695.7, 32, 32); // r= 695,700 
-                    const sun = new THREE.Mesh(sunGeo);
-                    scene.add( sun );
-                    const light = new THREE.PointLight( 0xffffff );
-                    light.power = 4000000000000; 
-                    light.distance = 69630000;
-                    light.castShadow = true;
-                    scene.add( light );
-                    //Set up shadow properties for the light
-                    light.shadow.mapSize.width = 8046; 
-                    light.shadow.mapSize.height = 8046;
-                    light.shadow.radius = 6;
-                    light.shadow.camera.near = 0.5; 
-                    light.shadow.camera.far = 500; 
-
-                    const pointLightHelper = new THREE.PointLightHelper( light );
-                    scene.add( pointLightHelper );
-
                 stats = new Stats();
 				document.body.appendChild( stats.dom );
 
@@ -200,9 +215,38 @@
 
                 }
 
+            //Find and orbit the Sun
+            function goToSun() {
+                planet = sun;
+                controls.target.set(0,0,0);
+                camera.position.x = 9999;
+                camera.position.y = 0;
+                camera.position.z = 0;
+            }
+            
+            //Find and orbit Mercury
+            function goToMercury() {
+                planet = mercury;
+                light.power = 400000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
+                controls.target = planet.position;
+                camera.position.x = planet.position.x + 20;
+                camera.position.y = planet.position.y;
+                camera.position.z = planet.position.z;
+            }
+
+            //Find and orbit Venus
+            function goToVenus() {
+                planet = venus;
+                controls.target = planet.position;
+                camera.position.x = planet.position.x + 175;
+                camera.position.y = planet.position.y;
+                camera.position.z = planet.position.z;
+            }
+
             // Find and orbit the Earth
             function goToEarth() {
                 planet = earthGroup;
+                light.power = 4000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
                 controls.target = planet.position;
                 camera.position.x = planet.position.x + 15;
                 camera.position.y = planet.position.y;
@@ -218,24 +262,9 @@
                 camera.position.z = planet.position.z;
             }
 
-            //Find and orbit the Sun
-            function goToSun() {
-                planet = sun;
-                controls.target.set(0,0,0);
-                camera.position.x = 9999;
-                camera.position.y = 0;
-                camera.position.z = 0;
-            }
-            
-            function goToMercury() {
-                planet = mercury;
-                controls.target = planet.position;
-                camera.position.x = planet.position.x + 175;
-                camera.position.y = planet.position.y;
-                camera.position.z = planet.position.z;
-            }
 
-            // Weird bug that spits errors and when switched to from another planet after the user move the camera, camera points away from the Sun
+
+            // 5-27 Weird bug that spits errors and when switched to from another planet after the user move the camera, camera points away from the Sun
 
             // Draw the scene every time the screen is refreshed
             function animate() {
@@ -247,17 +276,20 @@
                 // Prerotation calcs
                     oldPlanetPosX = planet.position.x;
                     oldPlanetPosZ = planet.position.z;
+                // Mercury Rotations
+                    mercury.position.x = center.x + mercuryRotDiameter * Math.cos(angle);
+                    mercury.position.z = center.z + mercuryRotDiameter * Math.sin(angle);
                 // Venus Rotations
-                    mercury.position.x = center.x + Earthradius * Math.cos(angle);
-                    mercury.position.z = center.z + Earthradius * Math.sin(angle);
+                    venus.position.x = center.x + venusRotDiameter * Math.cos(angle);
+                    venus.position.z = center.z + venusRotDiameter * Math.sin(angle);
                 // Earth Rotations
-                    earthGroup.position.x = center.x + Earthradius * Math.cos(angle);
-                    earthGroup.position.z = center.z + Earthradius * Math.sin(angle);
+                    earthGroup.position.x = center.x + earthRotDiameter * Math.cos(angle);
+                    earthGroup.position.z = center.z + earthRotDiameter * Math.sin(angle);
                     earth.rotation.y += 0.02 * delta;
                     earthCloud.rotation.y += 0.03 * delta;
                 // Moon Rotations
-                    moon.position.x = earthGroup.position.x + radius * Math.cos(angle);
-                    moon.position.z = earthGroup.position.z + radius * Math.sin(angle);
+                    moon.position.x = earthGroup.position.x + moonRotDiameter * Math.cos(angle);
+                    moon.position.z = earthGroup.position.z + moonRotDiameter * Math.sin(angle);
                 // Camera Rotations
                     newPlanetPosX = planet.position.x;
                     newPlanetPosZ = planet.position.z;
@@ -286,10 +318,6 @@
             init();
             onWindowResize();
             animate();
-
-            // 3/24: Shadow res likely causing poor performance on low end
-            // 3/25: At some point need a settings slider to support low end
-
 
         </script>
     </body>

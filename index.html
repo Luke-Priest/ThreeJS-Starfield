@@ -37,7 +37,7 @@
             import Stats from 'three/addons/libs/stats.module.js';
             import { getFresnelMat } from "getFresnelMat";
             
-            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
+            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, venusAtmosphere, mars, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
 
             let controls;
 
@@ -47,18 +47,21 @@
                     venus: function() {goToVenus()},
                     earth: function() {goToEarth()},
                     moon: function() {goToMoon()},
+                    mars: function() {goToMars()},
                 }
 
             const mercuryRotDiameter = 2*(57000+695.7);
             const venusRotDiameter = 2*(108000+695.7);
             const earthRotDiameter = 2*(149600+695.7);
             const moonRotDiameter = 38.4400*2;
+            const marsRotDiameter = 2*(149600+695.7);
             const center = new THREE.Vector3(0, 0, 0);
 
             // Step 5: In the animation loop, update the mesh's position using polar coordinates
             let angle = 0;
 
             const earthGroup = new THREE.Group();
+            const venusGroup = new THREE.Group();
 
 
             // Create a new instance of THREE.Clock()
@@ -100,25 +103,8 @@
                 gui.add( conf, 'venus').name( 'Venus' );
                 gui.add( conf, 'earth').name( 'Earth' );
                 gui.add( conf, 'moon').name( 'Moon' );
+                gui.add( conf, 'mars').name( 'Mars' );
                 gui.open();
-
-                //Create Mecury
-                const mercuryGeometry = new THREE.SphereGeometry(2.4405, 64, 64); // r= 2,440.5 km
-                const mercuryTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_mercury.jpg');
-                const mercuryMaterial = new THREE.MeshPhongMaterial({
-                    map: mercuryTexture,
-                })
-                mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
-                scene.add(mercury);
-
-                //Create Venus
-                const venusGeometry = new THREE.SphereGeometry(6.0518, 64, 64); // r= 6,051.8 km 
-                //const venusTexture = new THREE.TextureLoader().load('');
-                //const venusMaterial = new THREE.MeshPhongMaterial({
-                //    map: venusTexture,
-                //});
-                venus = new THREE.Mesh(venusGeometry);
-                scene.add(venus);
 
                 // Create Sun
                 const sunGeo = new THREE.SphereGeometry(695.7, 32, 32); // r= 695,700 
@@ -137,10 +123,39 @@
                     light.shadow.camera.far = 500; 
 
                     const pointLightHelper = new THREE.PointLightHelper( light );
-                    scene.add( pointLightHelper );
+
+                //Create Mecury
+                const mercuryGeometry = new THREE.SphereGeometry(2.4405, 64, 64); // r= 2,440.5 km
+                const mercuryTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_mercury.jpg');
+                const mercuryMaterial = new THREE.MeshPhongMaterial({
+                    map: mercuryTexture,
+                })
+                mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
+                scene.add(mercury);
+
+                //Create Venus
+
+                scene.add(venusGroup);
+
+                const venusGeometry = new THREE.SphereGeometry(6.0518, 64, 64); // r= 6,051.8 km 
+                const venusTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_venus_surface.jpg');
+                const venusMaterial = new THREE.MeshPhongMaterial({
+                    map: venusTexture,
+                });
+                venus = new THREE.Mesh(venusGeometry, venusMaterial);
+                venusGroup.add(venus);
+
+                const venusAtmosphereGeometry = new THREE.SphereGeometry(6.2, 64, 64);
+                const venusAtmosphereTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_venus_atmosphere.jpg');
+                const venusAtmosphereMaterial = new THREE.MeshPhongMaterial({
+                    map: venusAtmosphereTexture,
+                    transparent: true,
+                    opacity: 0.9,
+                })
+                venusAtmosphere = new THREE.Mesh(venusAtmosphereGeometry, venusAtmosphereMaterial);
+                venusGroup.add(venusAtmosphere);
 
                 //Create Earth
-
                     
                     scene.add(earthGroup);
 
@@ -198,6 +213,15 @@
                     moon.castShadow = true;
                     moon.receiveShadow = true; 
 
+                // Create Mars
+                    const marsGeo = new THREE.SphereGeometry(100, 64, 64);
+                    //const marsTexture = new THREE.TextureLoader().load('');
+                    //const marsMat = new THREE.MeshPhongMaterial({
+                    //    map: marsTexture,
+                    //});
+                    mars = new THREE.Mesh(marsGeo);
+                    scene.add(mars);
+
                 stats = new Stats();
 				document.body.appendChild( stats.dom );
 
@@ -236,9 +260,10 @@
 
             //Find and orbit Venus
             function goToVenus() {
-                planet = venus;
+                planet = venusGroup;
+                light.power = 1500000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
                 controls.target = planet.position;
-                camera.position.x = planet.position.x + 175;
+                camera.position.x = planet.position.x + 30;
                 camera.position.y = planet.position.y;
                 camera.position.z = planet.position.z;
             }
@@ -256,13 +281,22 @@
             // Find and Orbit Earth's moon
             function goToMoon() {
                 planet = moon;
+                light.power = 4000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
                 controls.target = planet.position;
                 camera.position.x = planet.position.x + 15;
                 camera.position.y = planet.position.y;
                 camera.position.z = planet.position.z;
             }
 
-
+            // Find and Orbit Mars
+            function goToMars() {
+                planet = mars;
+                light.power = 4000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
+                controls.target = planet.position;
+                camera.position.x = planet.position.x + 15;
+                camera.position.y = planet.position.y;
+                camera.position.z = planet.position.z;
+            }
 
             // 5-27 Weird bug that spits errors and when switched to from another planet after the user move the camera, camera points away from the Sun
 
@@ -280,8 +314,9 @@
                     mercury.position.x = center.x + mercuryRotDiameter * Math.cos(angle);
                     mercury.position.z = center.z + mercuryRotDiameter * Math.sin(angle);
                 // Venus Rotations
-                    venus.position.x = center.x + venusRotDiameter * Math.cos(angle);
-                    venus.position.z = center.z + venusRotDiameter * Math.sin(angle);
+                    venusGroup.position.x = center.x + venusRotDiameter * Math.cos(angle);
+                    venusGroup.position.z = center.z + venusRotDiameter * Math.sin(angle);
+                    venusAtmosphere.rotation.y += 0.03 * delta;
                 // Earth Rotations
                     earthGroup.position.x = center.x + earthRotDiameter * Math.cos(angle);
                     earthGroup.position.z = center.z + earthRotDiameter * Math.sin(angle);
@@ -290,6 +325,9 @@
                 // Moon Rotations
                     moon.position.x = earthGroup.position.x + moonRotDiameter * Math.cos(angle);
                     moon.position.z = earthGroup.position.z + moonRotDiameter * Math.sin(angle);
+                // Mars Rotations
+                    mars.position.x = center.x + marsRotDiameter * Math.cos(angle);
+                    mars.position.z = center.z + marsRotDiameter * Math.sin(angle);
                 // Camera Rotations
                     newPlanetPosX = planet.position.x;
                     newPlanetPosZ = planet.position.z;

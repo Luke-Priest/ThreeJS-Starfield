@@ -37,7 +37,7 @@
             import Stats from 'three/addons/libs/stats.module.js';
             import { getFresnelMat } from "getFresnelMat";
             
-            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, venusAtmosphere, mars, jupiter, saturn, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
+            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, venusAtmosphere, mars, jupiter, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
 
             let controls;
 
@@ -66,6 +66,7 @@
 
             const earthGroup = new THREE.Group();
             const venusGroup = new THREE.Group();
+            const saturnGroup = new THREE.Group();
 
 
             // Create a new instance of THREE.Clock()
@@ -238,13 +239,26 @@
                     scene.add(jupiter);
 
                 // Create Saturn
-                    const saturnGeo = new THREE.SphereGeometry(100,64,64);
-                    const saturnTexture = new THREE.TextureLoader().load('');
+                
+                    scene.add(saturnGroup);
+
+                    const saturnGeo = new THREE.SphereGeometry(60.268,64,64); // r = 60,268 km
+                    const saturnTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
                     const saturnMat = new THREE.MeshPhongMaterial({
                         map: saturnTexture,
                     });
-                    saturn = new THREE.Mesh(saturnGeo);
-                    scene.add(saturn);
+                    const saturn = new THREE.Mesh(saturnGeo, saturnMat);
+                    saturnGroup.add(saturn);
+
+                    const saturnRingGeo = new THREE.RingGeometry( 100, 75, 26);
+                    const saturnRingTexture = new THREE.TextureLoader().load('');
+                    const saturnRingMat = new THREE.MeshBasicMaterial({
+                        //map: saturnRingTexture,
+                        side: THREE.DoubleSide,
+                    });
+                    const saturnRing = new THREE.Mesh(saturnRingGeo, saturnRingMat);
+                    saturnGroup.add(saturnRing)
+                    saturnRing.rotation.x = 80;
 
                 stats = new Stats();
 				document.body.appendChild( stats.dom );
@@ -332,8 +346,8 @@
             }
 
             function goToSaturn() {
-                planet = saturn;
-                light.power = 60000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
+                planet = saturnGroup;
+                light.power = 200000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
                 controls.target = planet.position;
                 camera.position.x = planet.position.x + 150;
                 camera.position.y = planet.position.y;
@@ -374,8 +388,8 @@
                     jupiter.position.x = center.x + jupiterRotDiameter * Math.cos(angle);
                     jupiter.position.z = center.z + jupiterRotDiameter * Math.sin(angle);
                 // Saturn Rotations
-                    saturn.position.x = center.x + saturnRotDiameter * Math.cos(angle);
-                    saturn.position.z = center.z + saturnRotDiameter * Math.sin(angle);
+                    saturnGroup.position.x = center.x + saturnRotDiameter * Math.cos(angle);
+                    saturnGroup.position.z = center.z + saturnRotDiameter * Math.sin(angle);
                 // Camera Rotations
                     newPlanetPosX = planet.position.x;
                     newPlanetPosZ = planet.position.z;

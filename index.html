@@ -37,7 +37,7 @@
             import Stats from 'three/addons/libs/stats.module.js';
             import { getFresnelMat } from "getFresnelMat";
             
-            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, venusAtmosphere, mars, jupiter, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
+            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, venusAtmosphere, mars, jupiter, uranus, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
 
             let controls;
 
@@ -50,6 +50,7 @@
                     mars: function() {goToMars()},
                     jupiter: function() {goToJupiter()},
                     saturn: function() {goToSaturn()},
+                    uranus: function() {goToUranus()},
                 }
 
             const mercuryRotDiameter = 2*(57000+695.7);
@@ -59,6 +60,7 @@
             const marsRotDiameter = 2*(228000+695.7);
             const jupiterRotDiameter = 2*(780000+695.7);
             const saturnRotDiameter = 2*(1437000+695.7);
+            const uranusRotDiameter = 2*(1437000+695.7);
             const center = new THREE.Vector3(0, 0, 0);
 
             // Step 5: In the animation loop, update the mesh's position using polar coordinates
@@ -111,6 +113,7 @@
                 gui.add( conf, 'mars').name( 'Mars' );
                 gui.add( conf, 'jupiter').name( 'Jupiter' );
                 gui.add( conf, 'saturn').name( 'Saturn');
+                gui.add( conf, 'uranus').name( 'Uranus');
                 gui.open();
 
                 // Create Sun
@@ -250,15 +253,29 @@
                     const saturn = new THREE.Mesh(saturnGeo, saturnMat);
                     saturnGroup.add(saturn);
 
+                    // 6-1 Saturn's Ring is so broken
+
                     const saturnRingGeo = new THREE.RingGeometry( 100, 75, 26);
-                    const saturnRingTexture = new THREE.TextureLoader().load('');
-                    const saturnRingMat = new THREE.MeshBasicMaterial({
-                        //map: saturnRingTexture,
+                    const saturnRingTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_saturn_ring_alpha.png');
+                    const saturnRingMat = new THREE.MeshPhongMaterial({
+                        map: saturnRingTexture,
+                        alphaMap: saturnRingTexture,
                         side: THREE.DoubleSide,
                     });
                     const saturnRing = new THREE.Mesh(saturnRingGeo, saturnRingMat);
                     saturnGroup.add(saturnRing)
                     saturnRing.rotation.x = 80;
+
+                // Create Uranus
+
+                const uranusGeo = new THREE.SphereGeometry(100,64,64); // r = 60,268 km
+                    const uranusTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_uranus.jpg');
+                    const uranusMat = new THREE.MeshPhongMaterial({
+                        map: uranusTexture,
+                    });
+                    uranus = new THREE.Mesh(uranusGeo, uranusMat);
+                    scene.add(uranus);
+                
 
                 stats = new Stats();
 				document.body.appendChild( stats.dom );
@@ -354,6 +371,15 @@
                 camera.position.z = planet.position.z;
             }
 
+            function goToUranus() {
+                planet = uranus;
+                light.power = 200000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
+                controls.target = planet.position;
+                camera.position.x = planet.position.x + 150;
+                camera.position.y = planet.position.y;
+                camera.position.z = planet.position.z;
+            }
+
             // 5-27 Weird bug that spits errors and when switched to from another planet after the user move the camera, camera points away from the Sun
 
             // Draw the scene every time the screen is refreshed
@@ -390,6 +416,9 @@
                 // Saturn Rotations
                     saturnGroup.position.x = center.x + saturnRotDiameter * Math.cos(angle);
                     saturnGroup.position.z = center.z + saturnRotDiameter * Math.sin(angle);
+                // Uranus Rotations
+                    uranus.position.x = center.x + uranusRotDiameter * Math.cos(angle);
+                    uranus.position.z = center.z + uranusRotDiameter * Math.sin(angle);
                 // Camera Rotations
                     newPlanetPosX = planet.position.x;
                     newPlanetPosZ = planet.position.z;

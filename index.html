@@ -37,7 +37,7 @@
             import Stats from 'three/addons/libs/stats.module.js';
             import { getFresnelMat } from "getFresnelMat";
             
-            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, venusAtmosphere, mars, jupiter, uranus, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
+            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, venusAtmosphere, mars, jupiter, uranus, neptune, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
 
             let controls;
 
@@ -51,6 +51,7 @@
                     jupiter: function() {goToJupiter()},
                     saturn: function() {goToSaturn()},
                     uranus: function() {goToUranus()},
+                    neptune: function() {goToNeptune()}
                 }
 
             const mercuryRotDiameter = 2*(57000+695.7);
@@ -60,7 +61,8 @@
             const marsRotDiameter = 2*(228000+695.7);
             const jupiterRotDiameter = 2*(780000+695.7);
             const saturnRotDiameter = 2*(1437000+695.7);
-            const uranusRotDiameter = 2*(1437000+695.7);
+            const uranusRotDiameter = 2*(2871000+695.7);
+            const neptuneRotDiameter = 2*(4530000+695.7);
             const center = new THREE.Vector3(0, 0, 0);
 
             // Step 5: In the animation loop, update the mesh's position using polar coordinates
@@ -114,6 +116,7 @@
                 gui.add( conf, 'jupiter').name( 'Jupiter' );
                 gui.add( conf, 'saturn').name( 'Saturn');
                 gui.add( conf, 'uranus').name( 'Uranus');
+                gui.add( conf, 'neptune').name( 'Neptune');
                 gui.open();
 
                 // Create Sun
@@ -268,13 +271,23 @@
 
                 // Create Uranus
 
-                const uranusGeo = new THREE.SphereGeometry(100,64,64); // r = 60,268 km
+                    const uranusGeo = new THREE.SphereGeometry(25.559,64,64); // r = 25,559 km
                     const uranusTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_uranus.jpg');
                     const uranusMat = new THREE.MeshPhongMaterial({
                         map: uranusTexture,
                     });
                     uranus = new THREE.Mesh(uranusGeo, uranusMat);
                     scene.add(uranus);
+
+                // Create Neptune 
+
+                    const neptuneGeo = new THREE.SphereGeometry(24.764,64,64); // r = 24,764 km
+                    const neptuneTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_neptune.jpg');
+                    const neptuneMat = new THREE.MeshPhongMaterial({
+                        map: neptuneTexture,
+                    });
+                    neptune = new THREE.Mesh(neptuneGeo, neptuneMat);
+                    scene.add(neptune);
                 
 
                 stats = new Stats();
@@ -373,7 +386,16 @@
 
             function goToUranus() {
                 planet = uranus;
-                light.power = 200000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
+                light.power = 700000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
+                controls.target = planet.position;
+                camera.position.x = planet.position.x + 150;
+                camera.position.y = planet.position.y;
+                camera.position.z = planet.position.z;
+            }
+
+            function goToNeptune() {
+                planet = neptune;
+                light.power = 700000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
                 controls.target = planet.position;
                 camera.position.x = planet.position.x + 150;
                 camera.position.y = planet.position.y;
@@ -419,6 +441,9 @@
                 // Uranus Rotations
                     uranus.position.x = center.x + uranusRotDiameter * Math.cos(angle);
                     uranus.position.z = center.z + uranusRotDiameter * Math.sin(angle);
+                // Neptune Rotations
+                    neptune.position.x = center.x + neptuneRotDiameter * Math.cos(angle);
+                    neptune.position.z = center.z + neptuneRotDiameter * Math.sin(angle);
                 // Camera Rotations
                     newPlanetPosX = planet.position.x;
                     newPlanetPosZ = planet.position.z;

@@ -4,16 +4,91 @@
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <style>
+
+            @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400&display=swap");
+
             body {
                 margin: 0;
+                font-family: 'Poppins', sans-serif;
             }
             canvas {
                 width: 100%;
                 height: 100%; 
             }
+            h1 {
+                color: white;
+            }
+            p {
+                color: white;
+                font: normal;
+            }
+            h2 {
+                color: white;
+            }
+            #ui {
+                position: fixed; 
+                margin-top: 1%;
+                margin-left: 1%;
+                padding: 2%;
+                padding-top: 0;
+                background-color: rgb(75, 48, 48);
+                opacity: 99%;
+                height: 92%;
+                width: 30%;
+                overflow-x: hidden;
+                overflow-y: auto;
+                border-radius: 2%;
+            }
+            figure {
+                color: white;
+                margin: 0;
+            }
+            #planetImage {
+                width: 100%;
+                height: auto;
+                border-radius: 2%;
+            }
+            table {
+                color: white;
+                width: 100%;
+            }
+            th { 
+                width: 50%;
+                text-align: center;
+            }
+            td {
+                text-align: center;
+            }
         </style>
     </head>
     <body>
+        <div id="ui">
+                <h1 id="planetName">Sun</h1>
+                <figure>
+                    <img id="planetImage" alt="image of planet" src="textures/SunImage.jpg">
+                    <figcaption id="caption">The Sun in true color by Matúš Motlo, May 8, 2019</figcaption>
+                </figure>
+                <p id="planetDescription">The center of the Solar System, the Sun is 4.6 billion years old.</p>
+                <h2>More information: (Approx.)</h2>
+                <table id="planetTable">
+                    <tr>
+                        <th>Dist. from The Sun</th>
+                        <td id="sun">N/A</td>
+                    </tr>
+                    <tr>
+                        <th>Avg. Radius</th>
+                        <td id="radius">435,000 miles</td>
+                    </tr>
+                    <tr>
+                        <th>Circumference</th>
+                        <td id="circumference">2.7M miles</td>
+                    </tr>
+                    <tr>
+                        <th>Avg. Temp</th>
+                        <td id="temp">10M°F</td>
+                    </tr>
+                </table>
+        </div>
         <script type="importmap">
             {
               "imports": {
@@ -34,10 +109,10 @@
             import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
             import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
             import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-            import Stats from 'three/addons/libs/stats.module.js';
             import { getFresnelMat } from "getFresnelMat";
+
             
-            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, venusAtmosphere, mars, jupiter, uranus, neptune, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
+            let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, venusAtmosphere, mars, jupiter, uranus, neptune, saturnUpLight, saturnDownLight, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
 
             let controls;
 
@@ -61,6 +136,7 @@
             const marsRotDiameter = 2*(228000+695.7);
             const jupiterRotDiameter = 2*(780000+695.7);
             const saturnRotDiameter = 2*(1437000+695.7);
+            const saturnLightRotDiameter = 2*(1436900+695.7);
             const uranusRotDiameter = 2*(2871000+695.7);
             const neptuneRotDiameter = 2*(4530000+695.7);
             const center = new THREE.Vector3(0, 0, 0);
@@ -139,7 +215,7 @@
 
                 //Create Mecury
                 const mercuryGeometry = new THREE.SphereGeometry(2.4405, 64, 64); // r= 2,440.5 km
-                const mercuryTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_mercury.jpg');
+                const mercuryTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_mercury.jpg');
                 const mercuryMaterial = new THREE.MeshPhongMaterial({
                     map: mercuryTexture,
                 })
@@ -151,7 +227,7 @@
                 scene.add(venusGroup);
 
                 const venusGeometry = new THREE.SphereGeometry(6.0518, 64, 64); // r= 6,051.8 km 
-                const venusTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_venus_surface.jpg');
+                const venusTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_venus_surface.jpg');
                 const venusMaterial = new THREE.MeshPhongMaterial({
                     map: venusTexture,
                 });
@@ -159,7 +235,7 @@
                 venusGroup.add(venus);
 
                 const venusAtmosphereGeometry = new THREE.SphereGeometry(6.2, 64, 64);
-                const venusAtmosphereTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_venus_atmosphere.jpg');
+                const venusAtmosphereTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_venus_atmosphere.jpg');
                 const venusAtmosphereMaterial = new THREE.MeshPhongMaterial({
                     map: venusAtmosphereTexture,
                     transparent: true,
@@ -173,10 +249,10 @@
                     scene.add(earthGroup);
 
                     const earthGeometry = new THREE.SphereGeometry(6.371, 64, 64); // r= 6371 km
-                    const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/RealisticDayEarth.jpg'); 
-                    const bumpMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/earthbump10k.jpg');
-                    const specularMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/water_4k.png');
-                    const lightMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/EarthLightMap.jpg');
+                    const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/RealisticDayEarth.jpg'); 
+                    const bumpMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/earthbump10k.jpg');
+                    const specularMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/water_4k.png');
+                    const lightMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/EarthLightMap.jpg');
                     const earthMaterial = new THREE.MeshPhongMaterial({ 
                         map: texture,
                         bumpMap: bumpMap,
@@ -197,7 +273,7 @@
 
                     //Create clouds
                     const cloudGeometry = new THREE.SphereGeometry(6.39, 64, 64); // Should be optimized // to scale r=6390 km
-                    const cloudTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/main/textures/fair_clouds_4k.png'); // Might wanna change texture for more clouds
+                    const cloudTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/fair_clouds_4k.png'); // Might wanna change texture for more clouds
                     const cloudMaterial = new THREE.MeshPhongMaterial({
                         map: cloudTexture,
                         transparent: true,
@@ -216,7 +292,7 @@
 
                 // Create Moon 
                     const moonGeo = new THREE.SphereGeometry(1.7375, 32, 32); // r= 1,737.5 km
-                    const moonTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/2024-2025-Portfolio/Test/textures/2k_moon.jpg');
+                    const moonTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_moon.jpg');
                     const moonMat = new THREE.MeshPhongMaterial({
                         emissive: true,
                         map: moonTexture,
@@ -228,7 +304,7 @@
 
                 // Create Mars
                     const marsGeo = new THREE.SphereGeometry(3.3962, 64, 64); // r= 3396.2 km
-                    const marsTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_mars.jpg');
+                    const marsTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_mars.jpg');
                     const marsMat = new THREE.MeshPhongMaterial({
                         map: marsTexture,
                     });
@@ -237,7 +313,7 @@
 
                 // Create Jupiter
                     const jupiterGeo = new THREE.SphereGeometry(71.492,64,64); // r = 71,492 km
-                    const jupiterTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_jupiter.jpg');
+                    const jupiterTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_jupiter.jpg');
                     const jupiterMat = new THREE.MeshPhongMaterial({
                         map: jupiterTexture,
                     });
@@ -249,32 +325,91 @@
                     scene.add(saturnGroup);
 
                     const saturnGeo = new THREE.SphereGeometry(60.268,64,64); // r = 60,268 km
-                    const saturnTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
+                    const saturnTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
                     const saturnMat = new THREE.MeshPhongMaterial({
                         map: saturnTexture,
                     });
                     const saturn = new THREE.Mesh(saturnGeo, saturnMat);
+                    saturn.castShadow = true;
+                    saturn.receiveShadow = true;
                     saturnGroup.add(saturn);
 
                     // 6-1 Saturn's Ring is so broken
 
-                    const saturnRingGeo = new THREE.RingGeometry( 100, 75, 26);
-                    const saturnRingTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_saturn_ring_alpha.png');
-                    const saturnRingMat = new THREE.MeshBasicMaterial({
-                        map: saturnRingTexture,
-                        transparent: true,
-                        color: 0xffffff,
-                        opacity: 0.5,
-                        side: THREE.DoubleSide,
+                    const saturnInnerRingGeo = new THREE.RingGeometry(79, 70, 64);
+                    const saturnInnerRingTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
+                    const saturnInnerRingMat = new THREE.MeshStandardMaterial({
+                    //    map: saturnTexture,
+                          side: THREE.DoubleSide,
+                          color: 0xded29b,
+                          transparent: true,
+                          opacity: 0.85,
                     });
-                    const saturnRing = new THREE.Mesh(saturnRingGeo, saturnRingMat);
-                    saturnGroup.add(saturnRing)
-                    saturnRing.rotation.x = 80;
+                    const saturnInnerRing = new THREE.Mesh(saturnInnerRingGeo, saturnInnerRingMat);
+                    saturnInnerRing.rotation.x = 80;
+                    saturnInnerRing.receiveShadow = true;
+                    saturnGroup.add(saturnInnerRing);
+
+                    const saturnMiddleRingGeo = new THREE.RingGeometry(100, 80, 64);
+                    const saturnMiddleRingTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
+                    const saturnMiddleRingMat = new THREE.MeshStandardMaterial({
+                    //    map: saturnTexture,
+                          side: THREE.DoubleSide,
+                          color: 0xf8e5aa,
+                          transparent: true,
+                          opacity: 0.98,
+                    });
+                    const saturnMiddleRing = new THREE.Mesh(saturnMiddleRingGeo, saturnMiddleRingMat);
+                    saturnMiddleRing.rotation.x = 80;
+                    saturnMiddleRing.receiveShadow = true;
+                    saturnGroup.add(saturnMiddleRing);
+                    
+                    const saturnOuterRingGeo = new THREE.RingGeometry(110, 101, 64);
+                    const saturnOuterRingTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
+                    const saturnOuterRingMat = new THREE.MeshStandardMaterial({
+                    //    map: saturnTexture,
+                          side: THREE.DoubleSide,
+                          color: 0x878260,
+                          transparent: true,
+                          opacity: 0.99,
+                    });
+                    const saturnOuterRing = new THREE.Mesh(saturnOuterRingGeo, saturnOuterRingMat);
+                    saturnOuterRing.rotation.x = 80;
+                    saturnOuterRing.receiveShadow = true;
+                    saturnGroup.add(saturnOuterRing);
+
+                    // Saturn Light
+                    saturnDownLight = new THREE.PointLight( 0xffffff );
+                    saturnDownLight.power = 200000; 
+                    saturnDownLight.distance = 69630000;
+                    saturnDownLight.castShadow = true;
+                    scene.add( saturnDownLight );
+                    //Set up shadow properties for the saturn Light
+                    saturnDownLight.position.y = -200;
+                    saturnDownLight.shadow.mapSize.width = 8046; 
+                    saturnDownLight.shadow.mapSize.height = 8046;
+                    saturnDownLight.shadow.radius = 6;
+                    saturnDownLight.shadow.camera.near = 0.5; 
+                    saturnDownLight.shadow.camera.far = 500; 
+
+                    // Saturn Light
+                    saturnUpLight = new THREE.PointLight( 0xffffff );
+                    saturnUpLight.power = 200000; 
+                    saturnUpLight.distance = 69630000;
+                    saturnUpLight.castShadow = true;
+                    scene.add( saturnUpLight );
+                    //Set up shadow properties for the saturn Light
+                    saturnUpLight.position.y = 200;
+                    saturnUpLight.shadow.mapSize.width = 8046; 
+                    saturnUpLight.shadow.mapSize.height = 8046;
+                    saturnUpLight.shadow.radius = 6;
+                    saturnUpLight.shadow.camera.near = 0.5; 
+                    saturnUpLight.shadow.camera.far = 500; 
 
                 // Create Uranus
 
                     const uranusGeo = new THREE.SphereGeometry(25.559,64,64); // r = 25,559 km
-                    const uranusTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_uranus.jpg');
+                    const uranusTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_uranus.jpg');
                     const uranusMat = new THREE.MeshPhongMaterial({
                         map: uranusTexture,
                     });
@@ -284,16 +419,12 @@
                 // Create Neptune 
 
                     const neptuneGeo = new THREE.SphereGeometry(24.764,64,64); // r = 24,764 km
-                    const neptuneTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Scuwub/ThreeJS-Starfield/Test/textures/2k_neptune.jpg');
+                    const neptuneTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_neptune.jpg');
                     const neptuneMat = new THREE.MeshPhongMaterial({
                         map: neptuneTexture,
                     });
                     neptune = new THREE.Mesh(neptuneGeo, neptuneMat);
                     scene.add(neptune);
-                
-
-                stats = new Stats();
-				document.body.appendChild( stats.dom );
 
                 planet = sun;
 
@@ -316,6 +447,14 @@
                 camera.position.x = 9999;
                 camera.position.y = 0;
                 camera.position.z = 0;
+                document.getElementById("planetName").innerHTML = "Sun";
+                document.getElementById("planetImage").src = "textures/SunImage.jpg";
+                document.getElementById("caption").innerHTML = "The Sun in true color by Matúš Motlo, May 8, 2019";
+                document.getElementById("planetDescription").innerHTML = "The center of the Solar System, the Sun is 4.6 billion years old.";
+                document.getElementById("sun").innerHTML = "N/A";
+                document.getElementById("radius").innerHTML = "435,000 miles";
+                document.getElementById("circumference").innerHTML = "2.7M miles";
+                document.getElementById("temp").innerHTML = "10M°F";
             }
             
             //Find and orbit Mercury
@@ -326,6 +465,14 @@
                 camera.position.x = planet.position.x + 20;
                 camera.position.y = planet.position.y;
                 camera.position.z = planet.position.z;
+                document.getElementById("planetName").innerHTML = "Mercury";
+                document.getElementById("planetImage").src = "textures/MercuryImage.jpg";
+                document.getElementById("caption").innerHTML = "JPL, October 7, 2008";
+                document.getElementById("planetDescription").innerHTML = "The first planet from the Sun, Mercury is the smallest in the Solar System.";
+                document.getElementById("sun").innerHTML = "35,418,158 mi";
+                document.getElementById("radius").innerHTML = "1,516 mi";
+                document.getElementById("circumference").innerHTML = "9,525";
+                document.getElementById("temp").innerHTML = "333°F";
             }
 
             //Find and orbit Venus
@@ -336,6 +483,14 @@
                 camera.position.x = planet.position.x + 30;
                 camera.position.y = planet.position.y;
                 camera.position.z = planet.position.z;
+                document.getElementById("planetName").innerHTML = "Venus";
+                document.getElementById("planetImage").src = "textures/VenusImage.jpg";
+                document.getElementById("caption").innerHTML = "NASA/JPL-Caltech, February 1974";
+                document.getElementById("planetDescription").innerHTML = "The second planet from the sun, Venus has the densest atmosphere out of the terrestrial planets.";
+                document.getElementById("sun").innerHTML = "...";
+                document.getElementById("radius").innerHTML = "...";
+                document.getElementById("circumference").innerHTML = "...";
+                document.getElementById("temp").innerHTML = "867°F";
             }
 
             // Find and orbit the Earth
@@ -346,6 +501,14 @@
                 camera.position.x = planet.position.x + 15;
                 camera.position.y = planet.position.y;
                 camera.position.z = planet.position.z;
+                document.getElementById("planetName").innerHTML = "Earth";
+                document.getElementById("planetImage").src = "textures/EarthImage.jpg";
+                document.getElementById("caption").innerHTML = "Reto Stöckli, October 9, 2007";
+                document.getElementById("planetDescription").innerHTML = "The home of the human race, Earth is the third planet from the Sun. Earth has been nicknamed blue marble due to its smooth and colorful apperance.";
+                document.getElementById("sun").innerHTML = "92,584,307 mi";
+                document.getElementById("radius").innerHTML = "3,958.8 mi";
+                document.getElementById("circumference").innerHTML = "24,901.461 mi";
+                document.getElementById("temp").innerHTML = "58°F";
             }
 
             // Find and Orbit Earth's moon
@@ -356,6 +519,14 @@
                 camera.position.x = planet.position.x + 15;
                 camera.position.y = planet.position.y;
                 camera.position.z = planet.position.z;
+                document.getElementById("planetName").innerHTML = "Moon";
+                document.getElementById("planetImage").src = "textures/MoonImage.jpg";
+                document.getElementById("caption").innerHTML = "NASA Goddard, December 8, 2017";
+                document.getElementById("planetDescription").innerHTML = "...";
+                document.getElementById("sun").innerHTML = "...";
+                document.getElementById("radius").innerHTML = "...";
+                document.getElementById("circumference").innerHTML = "...";
+                document.getElementById("temp").innerHTML = "...";
             }
 
             // Find and Orbit Mars
@@ -366,6 +537,14 @@
                 camera.position.x = planet.position.x + 15;
                 camera.position.y = planet.position.y;
                 camera.position.z = planet.position.z;
+                document.getElementById("planetName").innerHTML = "Mars";
+                document.getElementById("planetImage").src = "textures/MarsImage.png";
+                document.getElementById("caption").innerHTML = "Kevin Gill, August 3, 2021";
+                document.getElementById("planetDescription").innerHTML = "...";
+                document.getElementById("sun").innerHTML = "...";
+                document.getElementById("radius").innerHTML = "...";
+                document.getElementById("circumference").innerHTML = "...";
+                document.getElementById("temp").innerHTML = "...";
             }
 
             function goToJupiter() {
@@ -375,24 +554,48 @@
                 camera.position.x = planet.position.x + 150;
                 camera.position.y = planet.position.y;
                 camera.position.z = planet.position.z;
+                document.getElementById("planetName").innerHTML = "Jupiter";
+                document.getElementById("planetImage").src = "textures/JupiterImage.jpg";
+                document.getElementById("caption").innerHTML = "Kevin Gill";
+                document.getElementById("planetDescription").innerHTML = "...";
+                document.getElementById("sun").innerHTML = "...";
+                document.getElementById("radius").innerHTML = "...";
+                document.getElementById("circumference").innerHTML = "...";
+                document.getElementById("temp").innerHTML = "...";
             }
 
             function goToSaturn() {
                 planet = saturnGroup;
                 light.power = 200000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
                 controls.target = planet.position;
-                camera.position.x = planet.position.x + 150;
-                camera.position.y = planet.position.y;
+                camera.position.x = planet.position.x + 200;
+                camera.position.y = planet.position.y + 70;
                 camera.position.z = planet.position.z;
+                document.getElementById("planetName").innerHTML = "Saturn";
+                document.getElementById("planetImage").src = "textures/SaturnImage.png";
+                document.getElementById("caption").innerHTML = "JPL, December 30, 2008";
+                document.getElementById("planetDescription").innerHTML = "...";
+                document.getElementById("sun").innerHTML = "...";
+                document.getElementById("radius").innerHTML = "...";
+                document.getElementById("circumference").innerHTML = "...";
+                document.getElementById("temp").innerHTML = "...";
             }
 
             function goToUranus() {
                 planet = uranus;
-                light.power = 700000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
+                light.power = 900000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
                 controls.target = planet.position;
                 camera.position.x = planet.position.x + 150;
                 camera.position.y = planet.position.y;
                 camera.position.z = planet.position.z;
+                document.getElementById("planetName").innerHTML = "Uranus";
+                document.getElementById("planetImage").src = "textures/UranusImage.jpg";
+                document.getElementById("caption").innerHTML = "JPL, December 17, 1986";
+                document.getElementById("planetDescription").innerHTML = "...";
+                document.getElementById("sun").innerHTML = "...";
+                document.getElementById("radius").innerHTML = "...";
+                document.getElementById("circumference").innerHTML = "...";
+                document.getElementById("temp").innerHTML = "...";
             }
 
             function goToNeptune() {
@@ -402,6 +605,14 @@
                 camera.position.x = planet.position.x + 150;
                 camera.position.y = planet.position.y;
                 camera.position.z = planet.position.z;
+                document.getElementById("planetName").innerHTML = "Neptune";
+                document.getElementById("planetImage").src = "textures/NeptuneImage.png";
+                document.getElementById("caption").innerHTML = "NASA, August 17, 1989";
+                document.getElementById("planetDescription").innerHTML = "...";
+                document.getElementById("sun").innerHTML = "...";
+                document.getElementById("radius").innerHTML = "...";
+                document.getElementById("circumference").innerHTML = "...";
+                document.getElementById("temp").innerHTML = "...";
             }
 
             // 5-27 Weird bug that spits errors and when switched to from another planet after the user move the camera, camera points away from the Sun
@@ -440,6 +651,10 @@
                 // Saturn Rotations
                     saturnGroup.position.x = center.x + saturnRotDiameter * Math.cos(angle);
                     saturnGroup.position.z = center.z + saturnRotDiameter * Math.sin(angle);
+                    saturnUpLight.position.x = center.x + saturnLightRotDiameter * Math.cos(angle);
+                    saturnUpLight.position.z = center.z + saturnLightRotDiameter * Math.sin(angle);
+                    saturnDownLight.position.x = center.x + saturnLightRotDiameter * Math.cos(angle);
+                    saturnDownLight.position.z = center.z + saturnLightRotDiameter * Math.sin(angle);
                 // Uranus Rotations
                     uranus.position.x = center.x + uranusRotDiameter * Math.cos(angle);
                     uranus.position.z = center.z + uranusRotDiameter * Math.sin(angle);
@@ -456,7 +671,6 @@
                     controls.target = planet.position;
                     controls.update();
                     angle += angleIncrement;
-                stats.update();
             }
 
             function onWindowResize() {

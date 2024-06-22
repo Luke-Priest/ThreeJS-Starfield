@@ -222,6 +222,7 @@
                 // Init renderer
                 renderer = new THREE.WebGLRenderer({});
                 renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
                 // Set size (whole window)
                 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -315,108 +316,12 @@
                     jupiter = new THREE.Mesh(jupiterGeo, jupiterMat);
                     
 
-                // Create Saturn
+                
+
                 
                     
 
-                    const saturnGeo = new THREE.SphereGeometry(60.268,64,64); // r = 60,268 km
-                    const saturnTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
-                    const saturnMat = new THREE.MeshPhongMaterial({
-                        map: saturnTexture,
-                    });
-                    const saturn = new THREE.Mesh(saturnGeo, saturnMat);
-                    saturn.castShadow = true;
-                    saturn.receiveShadow = true;
-                    saturnGroup.add(saturn);
-
-                    const saturnInnerRingGeo = new THREE.RingGeometry(79, 70, 64);
-                    const saturnInnerRingTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
-                    const saturnInnerRingMat = new THREE.MeshStandardMaterial({
-                    //    map: saturnTexture,
-                          side: THREE.DoubleSide,
-                          color: 0xded29b,
-                          transparent: true,
-                          opacity: 0.85,
-                    });
-                    const saturnInnerRing = new THREE.Mesh(saturnInnerRingGeo, saturnInnerRingMat);
-                    saturnInnerRing.rotation.x = 80;
-                    saturnInnerRing.receiveShadow = true;
-                    saturnGroup.add(saturnInnerRing);
-
-                    const saturnMiddleRingGeo = new THREE.RingGeometry(100, 80, 64);
-                    const saturnMiddleRingTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
-                    const saturnMiddleRingMat = new THREE.MeshStandardMaterial({
-                    //    map: saturnTexture,
-                          side: THREE.DoubleSide,
-                          color: 0xf8e5aa,
-                          transparent: true,
-                          opacity: 0.98,
-                    });
-                    const saturnMiddleRing = new THREE.Mesh(saturnMiddleRingGeo, saturnMiddleRingMat);
-                    saturnMiddleRing.rotation.x = 80;
-                    saturnMiddleRing.receiveShadow = true;
-                    saturnGroup.add(saturnMiddleRing);
-                    
-                    const saturnOuterRingGeo = new THREE.RingGeometry(110, 101, 64);
-                    const saturnOuterRingTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
-                    const saturnOuterRingMat = new THREE.MeshStandardMaterial({
-                    //    map: saturnTexture,
-                          side: THREE.DoubleSide,
-                          color: 0x878260,
-                          transparent: true,
-                          opacity: 0.99,
-                    });
-                    const saturnOuterRing = new THREE.Mesh(saturnOuterRingGeo, saturnOuterRingMat);
-                    saturnOuterRing.rotation.x = 80;
-                    saturnOuterRing.receiveShadow = true;
-                    saturnGroup.add(saturnOuterRing);
-
-                    // Saturn Light
-                    saturnDownLight = new THREE.PointLight( 0xffffff );
-                    saturnDownLight.power = 200000; 
-                    saturnDownLight.distance = 69630000;
-                    saturnDownLight.castShadow = true;
-                    scene.add( saturnDownLight );
-                    //Set up shadow properties for the saturn Light
-                    saturnDownLight.position.y = -200;
-                    saturnDownLight.shadow.mapSize.width = 8046; 
-                    saturnDownLight.shadow.mapSize.height = 8046;
-                    saturnDownLight.shadow.radius = 6;
-                    saturnDownLight.shadow.camera.near = 0.5; 
-                    saturnDownLight.shadow.camera.far = 500; 
-
-                    // Saturn Light
-                    saturnUpLight = new THREE.PointLight( 0xffffff );
-                    saturnUpLight.power = 200000; 
-                    saturnUpLight.distance = 69630000;
-                    saturnUpLight.castShadow = true;
-                    scene.add( saturnUpLight );
-                    //Set up shadow properties for the saturn Light
-                    saturnUpLight.position.y = 200;
-                    saturnUpLight.shadow.mapSize.width = 8046; 
-                    saturnUpLight.shadow.mapSize.height = 8046;
-                    saturnUpLight.shadow.radius = 6;
-                    saturnUpLight.shadow.camera.near = 0.5; 
-                    saturnUpLight.shadow.camera.far = 500; 
-
-                // Create Uranus
-
-                    const uranusGeo = new THREE.SphereGeometry(25.559,64,64); // r = 25,559 km
-                    const uranusTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_uranus.jpg');
-                    const uranusMat = new THREE.MeshPhongMaterial({
-                        map: uranusTexture,
-                    });
-                    uranus = new THREE.Mesh(uranusGeo, uranusMat);
-                    
-
-                // Create Neptune 
-
-                    const neptuneGeo = new THREE.SphereGeometry(24.764,64,64); // r = 24,764 km
-                    const neptuneTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_neptune.jpg');
-                    const neptuneMat = new THREE.MeshPhongMaterial({
-                        map: neptuneTexture,
-                    });
-                    neptune = new THREE.Mesh(neptuneGeo, neptuneMat);
+                
 
                 planet = sun;
 
@@ -621,6 +526,89 @@
             }
 
             function goToSaturn() {
+                // Create Saturn
+                
+                    
+
+                const saturnGeo = new THREE.SphereGeometry(60.268,64,64); // r = 60,268 km
+                    const saturnTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
+                    const saturnMat = new THREE.MeshPhongMaterial({
+                        map: saturnTexture,
+                    });
+                    const saturn = new THREE.Mesh(saturnGeo, saturnMat);
+                    saturn.castShadow = true;
+                    saturn.receiveShadow = true;
+                    saturnGroup.add(saturn);
+
+                    const saturnInnerRingGeo = new THREE.RingGeometry(79, 70, 64);
+                    const saturnInnerRingTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
+                    const saturnInnerRingMat = new THREE.MeshStandardMaterial({
+                    //    map: saturnTexture,
+                          side: THREE.DoubleSide,
+                          color: 0xded29b,
+                          transparent: true,
+                          opacity: 0.85,
+                    });
+                    const saturnInnerRing = new THREE.Mesh(saturnInnerRingGeo, saturnInnerRingMat);
+                    saturnInnerRing.rotation.x = 80;
+                    saturnInnerRing.receiveShadow = true;
+                    saturnGroup.add(saturnInnerRing);
+
+                    const saturnMiddleRingGeo = new THREE.RingGeometry(100, 80, 64);
+                    const saturnMiddleRingTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
+                    const saturnMiddleRingMat = new THREE.MeshStandardMaterial({
+                    //    map: saturnTexture,
+                          side: THREE.DoubleSide,
+                          color: 0xf8e5aa,
+                          transparent: true,
+                          opacity: 0.98,
+                    });
+                    const saturnMiddleRing = new THREE.Mesh(saturnMiddleRingGeo, saturnMiddleRingMat);
+                    saturnMiddleRing.rotation.x = 80;
+                    saturnMiddleRing.receiveShadow = true;
+                    saturnGroup.add(saturnMiddleRing);
+                    
+                    const saturnOuterRingGeo = new THREE.RingGeometry(110, 101, 64);
+                    const saturnOuterRingTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
+                    const saturnOuterRingMat = new THREE.MeshStandardMaterial({
+                    //    map: saturnTexture,
+                          side: THREE.DoubleSide,
+                          color: 0x878260,
+                          transparent: true,
+                          opacity: 0.99,
+                    });
+                    const saturnOuterRing = new THREE.Mesh(saturnOuterRingGeo, saturnOuterRingMat);
+                    saturnOuterRing.rotation.x = 80;
+                    saturnOuterRing.receiveShadow = true;
+                    saturnGroup.add(saturnOuterRing);
+
+                    // Saturn Light
+                    saturnDownLight = new THREE.PointLight( 0xffffff );
+                    saturnDownLight.power = 200000; 
+                    saturnDownLight.distance = 69630000;
+                    saturnDownLight.castShadow = true;
+                    scene.add( saturnDownLight );
+                    //Set up shadow properties for the saturn Light
+                    saturnDownLight.position.y = -200;
+                    saturnDownLight.shadow.mapSize.width = 8046; 
+                    saturnDownLight.shadow.mapSize.height = 8046;
+                    saturnDownLight.shadow.radius = 6;
+                    saturnDownLight.shadow.camera.near = 0.5; 
+                    saturnDownLight.shadow.camera.far = 500; 
+
+                    // Saturn Light
+                    saturnUpLight = new THREE.PointLight( 0xffffff );
+                    saturnUpLight.power = 200000; 
+                    saturnUpLight.distance = 69630000;
+                    saturnUpLight.castShadow = true;
+                    scene.add( saturnUpLight );
+                    //Set up shadow properties for the saturn Light
+                    saturnUpLight.position.y = 200;
+                    saturnUpLight.shadow.mapSize.width = 8046; 
+                    saturnUpLight.shadow.mapSize.height = 8046;
+                    saturnUpLight.shadow.radius = 6;
+                    saturnUpLight.shadow.camera.near = 0.5; 
+                    saturnUpLight.shadow.camera.far = 500; 
                 scene.add(saturnGroup);
                 planet = saturnGroup;
                 light.power = 200000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
@@ -639,6 +627,14 @@
             }
 
             function goToUranus() {
+                // Create Uranus
+
+                const uranusGeo = new THREE.SphereGeometry(25.559,64,64); // r = 25,559 km
+                    const uranusTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_uranus.jpg');
+                    const uranusMat = new THREE.MeshPhongMaterial({
+                        map: uranusTexture,
+                    });
+                    uranus = new THREE.Mesh(uranusGeo, uranusMat);
                 scene.add(uranus);
                 planet = uranus;
                 light.power = 900000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
@@ -657,6 +653,14 @@
             }
 
             function goToNeptune() {
+                // Create Neptune 
+
+                const neptuneGeo = new THREE.SphereGeometry(24.764,64,64); // r = 24,764 km
+                    const neptuneTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_neptune.jpg');
+                    const neptuneMat = new THREE.MeshPhongMaterial({
+                        map: neptuneTexture,
+                    });
+                    neptune = new THREE.Mesh(neptuneGeo, neptuneMat);
                 scene.add(neptune);
                 planet = neptune;
                 light.power = 3500000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera

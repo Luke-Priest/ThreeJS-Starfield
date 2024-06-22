@@ -170,7 +170,8 @@
             const neptuneRotDiameter = 2*(4530000+695.7);
             const center = new THREE.Vector3(0, 0, 0);
 
-            let merRot = false;
+            let merRot, venRot, earRot, mooRot, marRot, jupRot, satRot, uraRot, nepRot = false;
+            
 
             // Step 5: In the animation loop, update the mesh's position using polar coordinates
             let angle = 0;
@@ -190,21 +191,7 @@
 
             const textureLoader = new THREE.TextureLoader(loadingManager);
 
-            function init() {
-                // Init scene
-                scene = new THREE.Scene();
-
-                // Init camera (PerspectiveCamera)
-                camera = new THREE.PerspectiveCamera(
-                    75,
-                    window.innerWidth / window.innerHeight,
-                    0.1,
-                    999999999999
-                );
-
-                camera.position.set(1,1,1);
-
-                const progressBar = document.getElementById('progress-bar');
+            const progressBar = document.getElementById('progress-bar');
 
                 loadingManager.onProgress = function(url, loaded, total) {
                    progressBar.value = (loaded / total) * 100;
@@ -218,6 +205,18 @@
                     ui.style.display = 'unset';
                     gui.show();
                 };
+
+            function init() {
+                // Init scene
+                scene = new THREE.Scene();
+
+                // Init camera (PerspectiveCamera)
+                camera = new THREE.PerspectiveCamera(
+                    75,
+                    window.innerWidth / window.innerHeight,
+                    0.1,
+                    999999999999
+                );
 
                 // Init renderer
                 renderer = new THREE.WebGLRenderer({});
@@ -264,68 +263,18 @@
 
                     const pointLightHelper = new THREE.PointLightHelper( light );
 
-                
-
-                //Create Venus
-
-                const venusGeometry = new THREE.SphereGeometry(6.0518, 64, 64); // r= 6,051.8 km 
-                const venusTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_venus_surface.jpg');
-                const venusMaterial = new THREE.MeshPhongMaterial({
-                    map: venusTexture,
+                 //Create Mecury
+                const mercuryGeometry = new THREE.SphereGeometry(2.4405, 64, 64); // r= 2,440.5 km
+                const mercuryTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_mercury.jpg');
+                const mercuryMaterial = new THREE.MeshPhongMaterial({
+                    map: mercuryTexture,
                 });
-                venus = new THREE.Mesh(venusGeometry, venusMaterial);
-                venusGroup.add(venus);
-
-                const venusAtmosphereGeometry = new THREE.SphereGeometry(6.2, 64, 64);
-                const venusAtmosphereTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_venus_atmosphere.jpg');
-                const venusAtmosphereMaterial = new THREE.MeshPhongMaterial({
-                    map: venusAtmosphereTexture,
-                    transparent: true,
-                    opacity: 0.9,
-                })
-                venusAtmosphere = new THREE.Mesh(venusAtmosphereGeometry, venusAtmosphereMaterial);
-                venusGroup.add(venusAtmosphere);
-
-                
-
-                // Create Moon 
-                    const moonGeo = new THREE.SphereGeometry(1.7375, 32, 32); // r= 1,737.5 km
-                    const moonTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_moon.jpg');
-                    const moonMat = new THREE.MeshPhongMaterial({
-                        emissive: true,
-                        map: moonTexture,
-                    });
-                    moon = new THREE.Mesh(moonGeo, moonMat);
-                    moon.castShadow = true;
-                    moon.receiveShadow = true; 
-
-                // Create Mars
-                    const marsGeo = new THREE.SphereGeometry(3.3962, 64, 64); // r= 3396.2 km
-                    const marsTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_mars.jpg');
-                    const marsMat = new THREE.MeshPhongMaterial({
-                        map: marsTexture,
-                    });
-                    mars = new THREE.Mesh(marsGeo, marsMat);
-
-                // Create Jupiter
-                    const jupiterGeo = new THREE.SphereGeometry(71.492,64,64); // r = 71,492 km
-                    const jupiterTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_jupiter.jpg');
-                    const jupiterMat = new THREE.MeshPhongMaterial({
-                        map: jupiterTexture,
-                    });
-                    jupiter = new THREE.Mesh(jupiterGeo, jupiterMat);
-                    
-
-                
-
-                
-                    
-
-                
+                mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
 
                 planet = sun;
 
                 camera.position.set(9999,0,0);
+                controls.target.set(0,0,0);
 
                 //postprocessing
                 composer = new EffectComposer(renderer);
@@ -360,14 +309,7 @@
             
             //Find and orbit Mercury
             function goToMercury() {
-                //Create Mecury
-                const mercuryGeometry = new THREE.SphereGeometry(2.4405, 64, 64); // r= 2,440.5 km
-                const mercuryTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_mercury.jpg');
-                const mercuryMaterial = new THREE.MeshPhongMaterial({
-                    map: mercuryTexture,
-                });
-                mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
-                mercury.position.set(0,0,0);
+                
                 merRot = true;
                 scene.add(mercury);
                 planet = mercury;
@@ -388,6 +330,26 @@
 
             //Find and orbit Venus
             function goToVenus() {
+                //Create Venus
+
+                const venusGeometry = new THREE.SphereGeometry(6.0518, 64, 64); // r= 6,051.8 km 
+                const venusTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_venus_surface.jpg');
+                const venusMaterial = new THREE.MeshPhongMaterial({
+                    map: venusTexture,
+                });
+                venus = new THREE.Mesh(venusGeometry, venusMaterial);
+                venusGroup.add(venus);
+
+                const venusAtmosphereGeometry = new THREE.SphereGeometry(6.2, 64, 64);
+                const venusAtmosphereTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_venus_atmosphere.jpg');
+                const venusAtmosphereMaterial = new THREE.MeshPhongMaterial({
+                    map: venusAtmosphereTexture,
+                    transparent: true,
+                    opacity: 0.9,
+                })
+                venusAtmosphere = new THREE.Mesh(venusAtmosphereGeometry, venusAtmosphereMaterial);
+                venusGroup.add(venusAtmosphere);
+                venRot = true;
                 scene.add(venusGroup);
                 planet = venusGroup;
                 light.power = 1500000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
@@ -470,6 +432,16 @@
 
             // Find and Orbit Earth's moon
             function goToMoon() {
+                 // Create Moon 
+                 const moonGeo = new THREE.SphereGeometry(1.7375, 32, 32); // r= 1,737.5 km
+                    const moonTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_moon.jpg');
+                    const moonMat = new THREE.MeshPhongMaterial({
+                        emissive: true,
+                        map: moonTexture,
+                    });
+                    moon = new THREE.Mesh(moonGeo, moonMat);
+                    moon.castShadow = true;
+                    moon.receiveShadow = true; 
                 scene.add(earthGroup);
                 scene.add(moon);
                 planet = moon;
@@ -490,6 +462,13 @@
 
             // Find and Orbit Mars
             function goToMars() {
+              // Create Mars
+                    const marsGeo = new THREE.SphereGeometry(3.3962, 64, 64); // r= 3396.2 km
+                    const marsTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_mars.jpg');
+                    const marsMat = new THREE.MeshPhongMaterial({
+                        map: marsTexture,
+                    });
+                    mars = new THREE.Mesh(marsGeo, marsMat);
                 scene.add(mars);
                 planet = mars;
                 light.power = 7000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
@@ -508,6 +487,13 @@
             }
 
             function goToJupiter() {
+                // Create Jupiter
+                const jupiterGeo = new THREE.SphereGeometry(71.492,64,64); // r = 71,492 km
+                    const jupiterTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_jupiter.jpg');
+                    const jupiterMat = new THREE.MeshPhongMaterial({
+                        map: jupiterTexture,
+                    });
+                    jupiter = new THREE.Mesh(jupiterGeo, jupiterMat);
                 scene.add(jupiter);
                 planet = jupiter;
                 light.power = 60000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
@@ -527,9 +513,6 @@
 
             function goToSaturn() {
                 // Create Saturn
-                
-                    
-
                 const saturnGeo = new THREE.SphereGeometry(60.268,64,64); // r = 60,268 km
                     const saturnTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
                     const saturnMat = new THREE.MeshPhongMaterial({
@@ -610,6 +593,7 @@
                     saturnUpLight.shadow.camera.near = 0.5; 
                     saturnUpLight.shadow.camera.far = 500; 
                 scene.add(saturnGroup);
+                satRot = true;
                 planet = saturnGroup;
                 light.power = 200000000000000; //Change how bright the sun is because I don't know how to change the exposure of the camera
                 controls.target = planet.position;
@@ -696,36 +680,52 @@
                     mercury.position.z = center.z + mercuryRotDiameter * Math.sin(angle);
                 };
                 // Venus Rotations
+                if(venRot == true) {
                     venusGroup.position.x = center.x + venusRotDiameter * Math.cos(angle);
                     venusGroup.position.z = center.z + venusRotDiameter * Math.sin(angle);
                     venusAtmosphere.rotation.y += 0.03 * delta;
+                };
                 // Earth Rotations
+                if(earRot == true) {
                     earthGroup.position.x = center.x + earthRotDiameter * Math.cos(angle);
                     earthGroup.position.z = center.z + earthRotDiameter * Math.sin(angle);
                     earth.rotation.y += 0.02 * delta;
                     earthCloud.rotation.y += 0.03 * delta;
+                }
                 // Moon Rotations
+                if(earRot == true) {
                     moon.position.x = earthGroup.position.x + moonRotDiameter * Math.cos(angle);
                     moon.position.z = earthGroup.position.z + moonRotDiameter * Math.sin(angle);
+                }
                 // Mars Rotations
+                if(marRot == true) {
                     mars.position.x = center.x + marsRotDiameter * Math.cos(angle);
                     mars.position.z = center.z + marsRotDiameter * Math.sin(angle);
+                }
                 // Jupiter Rotations
+                if(jupRot == true) {
                     jupiter.position.x = center.x + jupiterRotDiameter * Math.cos(angle);
                     jupiter.position.z = center.z + jupiterRotDiameter * Math.sin(angle);
+                }
                 // Saturn Rotations
+                if(satRot == true) {
                     saturnGroup.position.x = center.x + saturnRotDiameter * Math.cos(angle);
                     saturnGroup.position.z = center.z + saturnRotDiameter * Math.sin(angle);
                     saturnUpLight.position.x = center.x + saturnLightRotDiameter * Math.cos(angle);
                     saturnUpLight.position.z = center.z + saturnLightRotDiameter * Math.sin(angle);
                     saturnDownLight.position.x = center.x + saturnLightRotDiameter * Math.cos(angle);
                     saturnDownLight.position.z = center.z + saturnLightRotDiameter * Math.sin(angle);
+                }
                 // Uranus Rotations
+                if(uraRot == true) {
                     uranus.position.x = center.x + uranusRotDiameter * Math.cos(angle);
                     uranus.position.z = center.z + uranusRotDiameter * Math.sin(angle);
+                }
                 // Neptune Rotations
+                if(nepRot == true) {
                     neptune.position.x = center.x + neptuneRotDiameter * Math.cos(angle);
                     neptune.position.z = center.z + neptuneRotDiameter * Math.sin(angle);
+                }
                 // Camera Rotations
                     newPlanetPosX = planet.position.x;
                     newPlanetPosZ = planet.position.z;

@@ -15,6 +15,33 @@
                 width: 100%;
                 height: 100%; 
             }
+
+            .progress-bar-container {
+                position:absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.8);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+
+            #progress-bar {
+                width: 30%;
+                margin-top: 0.5%;
+                height: 2%;
+            }
+
+            label {
+                color: white;
+                font-size: 2em;
+            }
+
+            }
+
             h1 {
                 color: white;
             }
@@ -33,11 +60,12 @@
                 padding-top: 0;
                 background-color: rgb(75, 48, 48);
                 opacity: 99%;
-                height: 92%;
-                width: 30%;
+                height: 92vh;
+                width: 30vw;
                 overflow-x: hidden;
                 overflow-y: auto;
                 border-radius: 2%;
+                display: none;
             }
             figure {
                 color: white;
@@ -62,6 +90,10 @@
         </style>
     </head>
     <body>
+        <div class="progress-bar-container">
+            <label for="progress-bar">Loading...</label>
+            <progress id="progress-bar" value="0" max="100"></progress>
+        </div>
         <div id="ui">
                 <h1 id="planetName">Sun</h1>
                 <figure>
@@ -110,7 +142,6 @@
             import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
             import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
             import { getFresnelMat } from "getFresnelMat";
-
             
             let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, venusAtmosphere, mars, jupiter, uranus, neptune, saturnUpLight, saturnDownLight, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
 
@@ -169,6 +200,25 @@
 
                 camera.position.set(1,1,1);
 
+                const loadingManager = new THREE.LoadingManager();
+
+                const textureLoader = new THREE.TextureLoader(loadingManager);
+
+                const progressBar = document.getElementById('progress-bar');
+
+                loadingManager.onProgress = function(url, loaded, total) {
+                   progressBar.value = (loaded / total) * 100;
+                };
+
+                const progressBarContainer = document.querySelector('.progress-bar-container');
+                const ui = document.getElementById('ui');
+
+                loadingManager.onLoad = function() {
+                    progressBarContainer.style.display = 'none';
+                    ui.style.display = 'unset';
+                    gui.show();
+                };
+
                 // Init renderer
                 renderer = new THREE.WebGLRenderer({});
                 renderer.shadowMap.enabled = true;
@@ -183,6 +233,7 @@
                 controls = new OrbitControls( camera, renderer.domElement );
                 
                 gui = new GUI();
+                gui.hide();
                 gui.add( conf, 'sun').name( 'Sun' );
                 gui.add( conf, 'mercury').name( 'Mercury' );
                 gui.add( conf, 'venus').name( 'Venus' );
@@ -215,7 +266,7 @@
 
                 //Create Mecury
                 const mercuryGeometry = new THREE.SphereGeometry(2.4405, 64, 64); // r= 2,440.5 km
-                const mercuryTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_mercury.jpg');
+                const mercuryTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_mercury.jpg');
                 const mercuryMaterial = new THREE.MeshPhongMaterial({
                     map: mercuryTexture,
                 })
@@ -227,7 +278,7 @@
                 scene.add(venusGroup);
 
                 const venusGeometry = new THREE.SphereGeometry(6.0518, 64, 64); // r= 6,051.8 km 
-                const venusTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_venus_surface.jpg');
+                const venusTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_venus_surface.jpg');
                 const venusMaterial = new THREE.MeshPhongMaterial({
                     map: venusTexture,
                 });
@@ -235,7 +286,7 @@
                 venusGroup.add(venus);
 
                 const venusAtmosphereGeometry = new THREE.SphereGeometry(6.2, 64, 64);
-                const venusAtmosphereTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_venus_atmosphere.jpg');
+                const venusAtmosphereTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_venus_atmosphere.jpg');
                 const venusAtmosphereMaterial = new THREE.MeshPhongMaterial({
                     map: venusAtmosphereTexture,
                     transparent: true,
@@ -249,10 +300,10 @@
                     scene.add(earthGroup);
 
                     const earthGeometry = new THREE.SphereGeometry(6.371, 64, 64); // r= 6371 km
-                    const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/RealisticDayEarth.jpg'); 
-                    const bumpMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/earthbump10k.jpg');
-                    const specularMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/water_4k.png');
-                    const lightMap = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/EarthLightMap.jpg');
+                    const texture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/RealisticDayEarth.jpg'); 
+                    const bumpMap = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/earthbump10k.jpg');
+                    const specularMap = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/water_4k.png');
+                    const lightMap = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/EarthLightMap.jpg');
                     const earthMaterial = new THREE.MeshPhongMaterial({ 
                         map: texture,
                         bumpMap: bumpMap,
@@ -273,7 +324,7 @@
 
                     //Create clouds
                     const cloudGeometry = new THREE.SphereGeometry(6.39, 64, 64); // Should be optimized // to scale r=6390 km
-                    const cloudTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/fair_clouds_4k.png'); // Might wanna change texture for more clouds
+                    const cloudTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/fair_clouds_4k.png'); // Might wanna change texture for more clouds
                     const cloudMaterial = new THREE.MeshPhongMaterial({
                         map: cloudTexture,
                         transparent: true,
@@ -292,7 +343,7 @@
 
                 // Create Moon 
                     const moonGeo = new THREE.SphereGeometry(1.7375, 32, 32); // r= 1,737.5 km
-                    const moonTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_moon.jpg');
+                    const moonTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_moon.jpg');
                     const moonMat = new THREE.MeshPhongMaterial({
                         emissive: true,
                         map: moonTexture,
@@ -304,7 +355,7 @@
 
                 // Create Mars
                     const marsGeo = new THREE.SphereGeometry(3.3962, 64, 64); // r= 3396.2 km
-                    const marsTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_mars.jpg');
+                    const marsTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_mars.jpg');
                     const marsMat = new THREE.MeshPhongMaterial({
                         map: marsTexture,
                     });
@@ -313,7 +364,7 @@
 
                 // Create Jupiter
                     const jupiterGeo = new THREE.SphereGeometry(71.492,64,64); // r = 71,492 km
-                    const jupiterTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_jupiter.jpg');
+                    const jupiterTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_jupiter.jpg');
                     const jupiterMat = new THREE.MeshPhongMaterial({
                         map: jupiterTexture,
                     });
@@ -325,7 +376,7 @@
                     scene.add(saturnGroup);
 
                     const saturnGeo = new THREE.SphereGeometry(60.268,64,64); // r = 60,268 km
-                    const saturnTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
+                    const saturnTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
                     const saturnMat = new THREE.MeshPhongMaterial({
                         map: saturnTexture,
                     });
@@ -337,7 +388,7 @@
                     // 6-1 Saturn's Ring is so broken
 
                     const saturnInnerRingGeo = new THREE.RingGeometry(79, 70, 64);
-                    const saturnInnerRingTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
+                    const saturnInnerRingTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
                     const saturnInnerRingMat = new THREE.MeshStandardMaterial({
                     //    map: saturnTexture,
                           side: THREE.DoubleSide,
@@ -351,7 +402,7 @@
                     saturnGroup.add(saturnInnerRing);
 
                     const saturnMiddleRingGeo = new THREE.RingGeometry(100, 80, 64);
-                    const saturnMiddleRingTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
+                    const saturnMiddleRingTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
                     const saturnMiddleRingMat = new THREE.MeshStandardMaterial({
                     //    map: saturnTexture,
                           side: THREE.DoubleSide,
@@ -365,7 +416,7 @@
                     saturnGroup.add(saturnMiddleRing);
                     
                     const saturnOuterRingGeo = new THREE.RingGeometry(110, 101, 64);
-                    const saturnOuterRingTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
+                    const saturnOuterRingTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_saturn.jpg');
                     const saturnOuterRingMat = new THREE.MeshStandardMaterial({
                     //    map: saturnTexture,
                           side: THREE.DoubleSide,
@@ -409,7 +460,7 @@
                 // Create Uranus
 
                     const uranusGeo = new THREE.SphereGeometry(25.559,64,64); // r = 25,559 km
-                    const uranusTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_uranus.jpg');
+                    const uranusTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_uranus.jpg');
                     const uranusMat = new THREE.MeshPhongMaterial({
                         map: uranusTexture,
                     });
@@ -419,7 +470,7 @@
                 // Create Neptune 
 
                     const neptuneGeo = new THREE.SphereGeometry(24.764,64,64); // r = 24,764 km
-                    const neptuneTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_neptune.jpg');
+                    const neptuneTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_neptune.jpg');
                     const neptuneMat = new THREE.MeshPhongMaterial({
                         map: neptuneTexture,
                     });

@@ -24,10 +24,11 @@
                 width: 100%;
                 height: 100%;
                 background-color: rgba(0, 0, 0, 0.8);
-                display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
+                display: none;
+            }
 
             #progress-bar {
                 width: 30%;
@@ -38,8 +39,6 @@
             label {
                 color: white;
                 font-size: 2em;
-            }
-
             }
 
             h1 {
@@ -65,7 +64,6 @@
                 overflow-x: hidden;
                 overflow-y: auto;
                 border-radius: 2%;
-                display: none;
             }
             figure {
                 color: white;
@@ -146,16 +144,16 @@
             let controls;
 
             conf = {
-                    sun: function() {goToSun()},
-                    mercury: function() {goToMercury()},
+                    sun: function() {unloadPlanet(), goToSun()},
+                    mercury: function() {unloadPlanet(), goToMercury()},
                     venus: function() {unloadPlanet(), goToVenus()},
-                    earth: function() {goToEarth()},
-                    moon: function() {goToMoon()},
-                    mars: function() {goToMars()},
-                    jupiter: function() {goToJupiter()},
-                    saturn: function() {goToSaturn()},
-                    uranus: function() {goToUranus()},
-                    neptune: function() {goToNeptune()}
+                    earth: function() {unloadPlanet(), goToEarth()},
+                    moon: function() {unloadPlanet(), goToMoon()},
+                    mars: function() {unloadPlanet(), goToMars()},
+                    jupiter: function() {unloadPlanet(), goToJupiter()},
+                    saturn: function() {unloadPlanet(), goToSaturn()},
+                    uranus: function() {unloadPlanet(), goToUranus()},
+                    neptune: function() {unloadPlanet(), goToNeptune()}
                 }
 
             const mercuryRotDiameter = 2*(57000+695.7);
@@ -172,6 +170,7 @@
 
             let merRot, venRot, earRot, mooRot, marRot, jupRot, satRot, uraRot, nepRot = false;
             
+            let mercuryMaterial;
 
             // Step 5: In the animation loop, update the mesh's position using polar coordinates
             let angle = 0;
@@ -193,12 +192,18 @@
 
             const progressBar = document.getElementById('progress-bar');
 
+            const progressBarContainer = document.querySelector('.progress-bar-container');
+            const ui = document.getElementById('ui');
+
+                loadingManager.onStart = function() {
+                    progressBarContainer.style.display = 'flex';
+                    ui.style.display = 'none';
+                    gui.hide();
+                }
+
                 loadingManager.onProgress = function(url, loaded, total) {
                    progressBar.value = (loaded / total) * 100;
                 };
-
-                const progressBarContainer = document.querySelector('.progress-bar-container');
-                const ui = document.getElementById('ui');
 
                 loadingManager.onLoad = function() {
                     progressBarContainer.style.display = 'none';
@@ -232,7 +237,6 @@
                 controls = new OrbitControls( camera, renderer.domElement );
                 
                 gui = new GUI();
-                gui.hide();
                 gui.add( conf, 'sun').name( 'Sun' );
                 gui.add( conf, 'mercury').name( 'Mercury' );
                 gui.add( conf, 'venus').name( 'Venus' );
@@ -263,14 +267,7 @@
 
                     const pointLightHelper = new THREE.PointLightHelper( light );
 
-                 //Create Mecury
-                const mercuryGeometry = new THREE.SphereGeometry(2.4405, 64, 64); // r= 2,440.5 km
-                const mercuryTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_mercury.jpg');
-                const mercuryMaterial = new THREE.MeshPhongMaterial({
-                    map: mercuryTexture,
-                });
-                mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
-
+                
                 planet = sun;
 
                 camera.position.set(9999,0,0);
@@ -287,7 +284,8 @@
                 }
 
             function unloadPlanet() {
-
+                //scene.remove(planet);
+                scene.remove(earthGroup);
             }
 
             //Find and orbit the Sun
@@ -309,7 +307,13 @@
             
             //Find and orbit Mercury
             function goToMercury() {
-                
+                //Create Mecury
+                const mercuryGeometry = new THREE.SphereGeometry(2.4405, 64, 64); // r= 2,440.5 km
+                const mercuryTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_mercury.jpg');
+                const mercuryMaterial = new THREE.MeshPhongMaterial({
+                    map: mercuryTexture,
+                });
+                mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
                 merRot = true;
                 scene.add(mercury);
                 planet = mercury;
@@ -333,7 +337,7 @@
                 //Create Venus
 
                 const venusGeometry = new THREE.SphereGeometry(6.0518, 64, 64); // r= 6,051.8 km 
-                const venusTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_venus_surface.jpg');
+                let venusTexture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/2k_venus_surface.jpg');
                 const venusMaterial = new THREE.MeshPhongMaterial({
                     map: venusTexture,
                 });
@@ -371,7 +375,6 @@
             function goToEarth() {
                 scene.add(earthGroup);
                 //Create Earth
-
                 const earthGeometry = new THREE.SphereGeometry(6.371, 64, 64); // r= 6371 km
                     const texture = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/RealisticDayEarth.jpg'); 
                     const bumpMap = textureLoader.load('https://raw.githubusercontent.com/Luke-Priest/ThreeJS-Starfield/Test/textures/earthbump10k.jpg');

@@ -138,6 +138,10 @@
             import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
             import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
             import { getFresnelMat } from "getFresnelMat";
+
+            if (navigator.userAgent.includes("iPhone")) {
+                document.getElementById("planetName").innerHTML = "test";
+            } 
             
             let camera, scene, renderer, composer, earth, earthCloud, textMesh, stats, moon, mercury, venus, venusAtmosphere, mars, jupiter, uranus, neptune, saturnUpLight, saturnDownLight, oldPlanetPosX, oldPlanetPosZ, newPlanetPosX, newPlanetPosZ, planetDifX, planetDifZ, gui, conf, sun, planet, light;
 
@@ -284,8 +288,7 @@
                 }
 
             function unloadPlanet() {
-                //scene.remove(planet);
-                scene.remove(earthGroup);
+                renderer.dispose();
             }
 
             //Find and orbit the Sun
